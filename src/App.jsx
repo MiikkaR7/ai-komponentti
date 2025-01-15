@@ -15,7 +15,7 @@ const App = () => {
         <form onSubmit={handleSubmit}>
           <label for="hankeidea">Hankeidea:</label>
           <input type="text" id="hanke" name="hankeidea"></input>
-          <input type="submit" value="Lähetä"></input>
+          <input type="submit" value="Sparraa"></input>
         </form>
       </div>
     );
