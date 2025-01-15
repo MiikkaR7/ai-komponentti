@@ -2,3 +2,5 @@ node_modules/
 dist
 .vscode/
 supabase/.temp/
+supabase/.branches/
+.env

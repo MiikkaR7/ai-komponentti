@@ -1,9 +1,16 @@
+import { createClient } from '@supabase/supabase-js'
+
 const App = () => {
 
-  const handleSubmit = (e) => {
+  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY)
+
+  const handleSubmit = async (event) => {
     try {
-      e.preventDefault();
-      console.log("submit handled");
+      event.preventDefault();
+      const { data, error } = await supabase.functions.invoke('hankeai', {
+        body: { name: event.target[0].value },
+      })
+      console.log(data);
     } catch (error) {
       console.log(error);
     }
