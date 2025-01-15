@@ -20,8 +20,10 @@ const App = () => {
       <div>
         <h1>Hankeideatyökalu</h1>
         <form onSubmit={handleSubmit}>
-          <label for="hankeidea">Hankeidea:</label>
-          <input type="text" id="hanke" name="hankeidea"></input>
+          <label>
+            Hankeidea:
+            <input type="text" id="hanke" name="hankeidea"></input>
+          </label>
           <input type="submit" value="Sparraa"></input>
         </form>
       </div>

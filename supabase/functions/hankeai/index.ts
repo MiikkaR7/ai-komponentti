@@ -9,7 +9,7 @@ const corsHeaders = {
 
 
 Deno.serve(async (req) => {
-  // This is needed if you're planning to invoke your function from a browser.
+
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
@@ -25,15 +25,10 @@ Deno.serve(async (req) => {
       status: 200,
     })
   } catch (error) {
-    let errorMessage = "Failed to do something exceptional";
 
-      if (error instanceof Error) {
-      errorMessage = error.message;
-      }
-      
-    return new Response(JSON.stringify({ error: errorMessage }), {
+    return new Response(JSON.stringify(error), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 400,
+      status: 500,
     })
   }
 })
