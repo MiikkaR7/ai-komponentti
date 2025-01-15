@@ -120,8 +120,9 @@ dist
 .tern-port
 
 # Stores VSCode versions used for testing VSCode extensions
+# and VSCode Deno config
 .vscode-test
-
+.vscode
 # yarn v2
 .yarn/cache
 .yarn/unplugged
