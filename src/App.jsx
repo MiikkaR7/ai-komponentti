@@ -1,9 +1,9 @@
-import { createClient } from '@supabase/supabase-js'
-import { useState } from 'react'
+import { createClient } from '@supabase/supabase-js';
+import { useState } from 'react';
 
 const App = () => {
 
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY)
+  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
   const [supabaseResponseState, setSupabaseResponseState] = useState('');
 
