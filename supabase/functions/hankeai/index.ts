@@ -6,9 +6,13 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+(BigInt.prototype as any).toJSON = function () {
+  return this.toString();
+};
+
 // Initialize DB connection
 const databaseUrl = Deno.env.get('SUPABASE_DB_URL');
-const pool = new postgres.Pool(databaseUrl, 3, true);
+const pool = new postgres.Pool(databaseUrl, 10, true);
 const connection = await pool.connect();
 
 Deno.serve(async (req) => {

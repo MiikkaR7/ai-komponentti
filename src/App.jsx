@@ -14,7 +14,6 @@ const App = () => {
       const { data, error } = await supabase.functions.invoke('hankeai');
       setSupabaseResponseState(JSON.stringify(data[0]));
       setGreetingState("Hello " + event.target[0].value +"!");
-      console.log(data[0]);
     } catch (error) {
       console.log(error);
     }
