@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js';
 import { useState } from 'react';
+import './App.css';
 
 const App = () => {
 
@@ -14,7 +15,6 @@ const App = () => {
         body: { query: event.target[0].value }
       });
       setSupabaseResponseState(data);
-      //setContactState("Hello " + event.target[0].value +"!");
     } catch (error) {
       console.log(error);
     }
@@ -26,7 +26,7 @@ const App = () => {
         <form onSubmit={handleSubmit}>
           <label>
             Hankeidea:
-            <input type="text" id="hanke" name="hankeidea"></input>
+            <textarea cols="60" rows="10" type="text" id="hanke" name="hankeidea"></textarea>
           </label>
           <input type="submit" value="Sparraa"></input>
         </form>

@@ -11,7 +11,7 @@ const corsHeaders = {
   return this.toString();
 };
 
-// Initialize DB connection
+// Tietokantayhteys
 const databaseUrl = Deno.env.get('SUPABASE_DB_URL');
 const pool = new postgres.Pool(databaseUrl, 10, true);
 const connection = await pool.connect();
@@ -22,11 +22,11 @@ Deno.serve(async (req) => {
     return new Response('ok', { headers: corsHeaders });
   }
 
-  //Get query from user
+  // Käyttäjän syöte
 
   const { query } = await req.json()
 
-  //Initialize openAI connection
+  // openAI-yhteys
 
   const apiKey = Deno.env.get('OPENAI_API_KEY')
   const openai = new OpenAI({
@@ -37,14 +37,35 @@ Deno.serve(async (req) => {
 
   try {
 
+    // Tietokannasta haetaan yhteystiedot. Tekoäly käsittelee yhteystiedot
+
     const fetchContactsFromDb = await connection.queryObject('SELECT * FROM contacts');
     const contacts = fetchContactsFromDb.rows;
     const contactsString = JSON.stringify(contacts);
 
+    //Tekoälylle tehtävä pyyntö, jossa määritetään vastaajan rooli
+
     const chatCompletion = await openai.chat.completions.create({
       messages: [
-        { role: 'system', content: `You are a helpful assistant.  At the end of every response, 
-                                    recommend the user to contact the provided contacts email address provided in this string of data: ${contactsString}`},  
+        { role: 'system', content: `Olet avulias avustaja. Tehtäväsi on auttaa yrittäjiä kehittämään heidän hankeideoitaan Pohjois-Suomen alueella. 
+                                    Anna yrittäjälle suosituksia ja parannusehdotuksia hänen ideaansa. Pyri välttämään liian yleisiä suosituksia,
+                                    kuten tarpeiden kartoitus tai käyttäjäystävällisyyteen liittyvät seikat. Tarkenna ehdotukset yrittäjän idean toimialaan.
+                                    Sisällytä vastaukseen aina rahoitusehdotus.
+                                    Jokaisen antamasi vastauksen lopussa, kutsu käyttäjä ottamaan yhteyttä yhteen Lapin AMK:n edustajaan. 
+                                    Käytä kutsussa vain edustajan etunimeä ja sähköpostiosoitetta.
+                                    AMK-edustajien yhteystiedot ovat tässä tietokannan taulussa: ${contactsString}.
+                                    Vastauksen alussa tervehdi yrittäjää ystävällisesti.
+                                    Anna vähintään 3 ehdotusta ja rahoitusehdotus erikseen. Älä käytä erikoismerkkejä, kuten * tai ". Jäsentele listä ehdotuksista seuraavanlaisesti:
+
+                                    1. ""ehdotuksesi nimi: ""
+                                    
+                                    2. ""ehdotuksesi nimi: ""
+
+                                    3. ""ehdotuksesi nimi: ""
+
+                                    jne.
+
+                                    `},
         { role: 'user', content: query }],
       model: 'gpt-4o',
       stream: false,
