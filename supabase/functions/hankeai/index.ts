@@ -1,35 +1,39 @@
-import "jsr:@supabase/functions-js/edge-runtime.d.ts"
-
-//example function
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+import * as postgres from 'https://deno.land/x/postgres@v0.17.0/mod.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-}
+};
 
+// Initialize DB connection
+const databaseUrl = Deno.env.get('SUPABASE_DB_URL');
+const pool = new postgres.Pool(databaseUrl, 3, true);
+const connection = await pool.connect();
 
 Deno.serve(async (req) => {
-
   if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+    return new Response('ok', { headers: corsHeaders });
   }
 
   try {
-    const { name } = await req.json()
-    const data = {
-      message: `Hello ${name}!`,
-    }
+    const result = await connection.queryObject(`SELECT * FROM contacts`);
+    const contacts = result.rows;
 
-    return new Response(JSON.stringify(data), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    const body = JSON.stringify(
+      contacts,
+      (key, value) => (typeof value === 'bigint' ? value.toString() : value),
+      2
+    );
+
+    return new Response(body, {
       status: 200,
-    })
-  } catch (error) {
-
-    return new Response(JSON.stringify(error), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: 500,
-    })
+      headers: { 'Content-Type': 'application/json; charset=utf-8', ...corsHeaders },
+    });
+  } catch (err) {
+    console.error(err);
+    return new Response(String(err?.message ?? err), { status: 500, headers: corsHeaders });
+  } finally {
+    connection.release();
   }
-})
-
+});
