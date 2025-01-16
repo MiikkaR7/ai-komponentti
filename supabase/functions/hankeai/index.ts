@@ -30,9 +30,9 @@ Deno.serve(async (req) => {
       status: 200,
       headers: { 'Content-Type': 'application/json; charset=utf-8', ...corsHeaders },
     });
-  } catch (err) {
-    console.error(err);
-    return new Response(String(err?.message ?? err), { status: 500, headers: corsHeaders });
+  } catch (error) {
+    console.error(error);
+    return new Response(String({message: "Internal server error"}), { status: 500, headers: corsHeaders });
   } finally {
     connection.release();
   }
