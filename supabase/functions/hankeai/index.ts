@@ -20,11 +20,7 @@ Deno.serve(async (req) => {
     const result = await connection.queryObject(`SELECT * FROM contacts`);
     const contacts = result.rows;
 
-    const body = JSON.stringify(
-      contacts,
-      (key, value) => (typeof value === 'bigint' ? value.toString() : value),
-      2
-    );
+    const body = JSON.stringify(contacts);
 
     return new Response(body, {
       status: 200,
