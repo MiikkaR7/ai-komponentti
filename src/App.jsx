@@ -21,9 +21,13 @@ const App = () => {
     }
   }
 
-  const handleContactForm = async () => {
+  const handleContactForm = async (formData) => {
     try {
-      console.log("Contact form handled")
+      const nimi = formData.get("lomakenimi");
+      const sposti = formData.get("lomakesposti");
+      const hanke = formData.get("lomakehanke");
+      const edustaja = formData.get("lomakevalikko");
+      console.log(nimi + " " + sposti + " " + hanke + " " + edustaja);
     } catch (error) {
       console.log(error);
     }
@@ -40,11 +44,11 @@ const App = () => {
           <p key={index}>{line}</p>
         ))}</div>
         <h1 className="yhteydenottolomake-otsikko">Ota yhteyttä</h1>
-        <form className="yhteydenottolomake" onSubmit={handleContactForm}>
-          <input className="yhteydenottolomake-nimi" placeholder="Nimi"></input>
-          <input className="yhteydenottolomake-sposti" placeholder="Sähköpostiosoite"></input>
-          <input className="yhteydenottolomake-hanke" placeholder="Hankeidea"></input>
-          <select className="yhteydenottolomake-valikko" id="valikko">
+        <form className="yhteydenottolomake" action={handleContactForm}>
+          <input name="lomakenimi" className="yhteydenottolomake-nimi" placeholder="Nimi"></input>
+          <input name="lomakesposti" className="yhteydenottolomake-sposti" placeholder="Sähköpostiosoite"></input>
+          <input name="lomakehanke" className="yhteydenottolomake-hanke" placeholder="Hankeidea"></input>
+          <select name="lomakevalikko" className="yhteydenottolomake-valikko">
             <option value="miikka.riipi@testi.com">miikka.riipi@testi.com</option>
           </select>
           <textarea className="yhteydenottolomake-viesti" placeholder="Viesti" cols="100" rows="10" type="text" id="viesti" name="hankeviesti"/>

@@ -24,14 +24,14 @@ Deno.serve(async (req) => {
 
   // Käyttäjän syöte
 
-  const { query } = await req.json()
+  const { query } = await req.json();
 
   // openAI-yhteys
 
-  const apiKey = Deno.env.get('OPENAI_API_KEY')
+  const apiKey = Deno.env.get('OPENAI_API_KEY');
   const openai = new OpenAI({
     apiKey: apiKey,
-  })
+  });
 
   let reply;
 
@@ -56,7 +56,8 @@ Deno.serve(async (req) => {
                     Sisällytä vastaukseen aina rahoitusehdotus, jossa mainitset kaikki mahdolliset rahoituslähteet, jotka ovat kyseiselle hankkeelle relevantteja.
                     Jokaisen antamasi vastauksen lopussa, kutsu käyttäjä ottamaan yhteyttä yhteen Lapin AMK:n edustajaan. 
                     Käytä kutsussa vain edustajan etunimeä ja sähköpostiosoitetta. 
-                    Valitse sopivin edustaja vertaamalla yrittäjän antamaa hankeideaa edustajien kuvaus-sarakkeeseen.
+                    Valitse sopivin edustaja vertaamalla yrittäjän antamaa hankeideaa edustajien kuvaus-sarakkeeseen. 
+                    Jos hankeidea soveltuu useammalle edustajalle, käytä edelleen avainsanat-saraketta, ja vertaa sitä hankeideaan.
                     AMK-edustajien yhteystiedot ja kuvaus ovat tässä tietokannan taulussa: ${contactsString}.
                     Vastauksen alussa tervehdi yrittäjää ystävällisesti.
                     Anna vähintään 3 ehdotusta ja rahoitusehdotus erikseen. Anna ehdotukset ilman numerointia tai erikoismerkkejä.`
@@ -66,10 +67,9 @@ Deno.serve(async (req) => {
           content: query 
         }
       ],
-      max_tokens: 1200,
       model: 'gpt-4o',
       stream: false,
-    })
+    });
 
     reply = chatCompletion.choices[0].message.content;
 
