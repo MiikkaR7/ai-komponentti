@@ -1,0 +1,108 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+}
+
+.ai-komponentti {
+    text-align: center;
+    width: 80%;
+    width: 500px;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+}
+
+.komponentti-otsikko {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.hankeidea {
+    margin-bottom: 20px;
+}
+
+.ai-kentta {
+    width: 100%;
+    box-sizing: border-box;
+    height: 150px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    resize: none;
+    margin: 0 auto;
+}
+
+
+.hankeidea-nappi {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.hankeidea-nappi:hover {
+    background-color: #0056b3;
+}
+
+.ai-vastaus {
+    height: 150px;
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+    text-align: left;
+    white-space: pre-wrap;
+    font-size: 14px;
+    color: #333;
+}
+
+.yhteydenottolomake-otsikko {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.yhteydenottolomake {
+    margin-bottom: 20px;
+}
+
+.yhteydenottolomake-viesti {
+    width: 100%;
+    box-sizing: border-box;
+    height: 150px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    resize: none;
+    margin: 0 auto;
+    margin-top: 10px;
+}
+
+.yhteydenottolomake-nappi {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.yhteydenottolomake-nappi:hover {
+    background-color: #0056b3;
+}

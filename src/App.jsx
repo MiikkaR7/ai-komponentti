@@ -21,19 +21,35 @@ const App = () => {
     }
   }
 
+  const handleContactForm = async () => {
+    try {
+      console.log("Contact form handled")
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
     return (
-      <div>
-        <h1>Hankeideatyökalu</h1>
-        <form onSubmit={handleSubmit}>
-          <label>
-            Hankeidea:
-            <textarea className="ai-kentta" cols="60" rows="10" type="text" id="hanke" name="hankeidea"></textarea>
-          </label>
-          <input type="submit" value="Sparraa"></input>
+      <div className="ai-komponentti">
+        <h1 className="komponentti-otsikko">Hankeideatyökalu</h1>
+        <form className="hankeidea" onSubmit={handleSubmit}>
+            <textarea className="ai-kentta" placeholder="Kirjoita hankeideasi tähän..." cols="100" rows="10" type="text" id="hanke" name="hankeidea"/>
+          <input className="hankeidea-nappi" type="submit" value="Sparraa"/>
         </form>
-        <div>{supabaseResponseState.split('\n').map((line, index) => (
+        <div className="ai-vastaus">{supabaseResponseState.split('\n').map((line, index) => (
           <p key={index}>{line}</p>
         ))}</div>
+        <h1 className="yhteydenottolomake-otsikko">Ota yhteyttä</h1>
+        <form className="yhteydenottolomake" onSubmit={handleContactForm}>
+          <input className="yhteydenottolomake-nimi" placeholder="Nimi"></input>
+          <input className="yhteydenottolomake-sposti" placeholder="Sähköpostiosoite"></input>
+          <input className="yhteydenottolomake-hanke" placeholder="Hankeidea"></input>
+          <select className="yhteydenottolomake-valikko" id="valikko">
+            <option value="miikka.riipi@testi.com">miikka.riipi@testi.com</option>
+          </select>
+          <textarea className="yhteydenottolomake-viesti" placeholder="Viesti" cols="100" rows="10" type="text" id="viesti" name="hankeviesti"/>
+          <input className="yhteydenottolomake-nappi" type="submit" value="Lähetä"/>
+        </form>
       </div>
     );
   }

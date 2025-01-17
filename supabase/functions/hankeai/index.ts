@@ -55,8 +55,9 @@ Deno.serve(async (req) => {
                     Anna erityisesti ehdotuksia, jotka ovat hyödyllisiä hankkeen toteuttamisen kannalta.
                     Sisällytä vastaukseen aina rahoitusehdotus, jossa mainitset kaikki mahdolliset rahoituslähteet, jotka ovat kyseiselle hankkeelle relevantteja.
                     Jokaisen antamasi vastauksen lopussa, kutsu käyttäjä ottamaan yhteyttä yhteen Lapin AMK:n edustajaan. 
-                    Käytä kutsussa vain edustajan etunimeä ja sähköpostiosoitetta.
-                    AMK-edustajien yhteystiedot ovat tässä tietokannan taulussa: ${contactsString}.
+                    Käytä kutsussa vain edustajan etunimeä ja sähköpostiosoitetta. 
+                    Valitse sopivin edustaja vertaamalla yrittäjän antamaa hankeideaa edustajien kuvaus-sarakkeeseen.
+                    AMK-edustajien yhteystiedot ja kuvaus ovat tässä tietokannan taulussa: ${contactsString}.
                     Vastauksen alussa tervehdi yrittäjää ystävällisesti.
                     Anna vähintään 3 ehdotusta ja rahoitusehdotus erikseen. Anna ehdotukset ilman numerointia tai erikoismerkkejä.`
         },
