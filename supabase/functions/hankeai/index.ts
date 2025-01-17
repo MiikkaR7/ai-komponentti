@@ -47,26 +47,25 @@ Deno.serve(async (req) => {
 
     const chatCompletion = await openai.chat.completions.create({
       messages: [
-        { role: 'system', content: `Olet avulias avustaja. Tehtäväsi on auttaa yrittäjiä kehittämään heidän hankeideoitaan Pohjois-Suomen alueella. 
-                                    Anna yrittäjälle suosituksia ja parannusehdotuksia hänen ideaansa. Pyri välttämään liian yleisiä suosituksia,
-                                    kuten tarpeiden kartoitus tai käyttäjäystävällisyyteen liittyvät seikat. Tarkenna ehdotukset yrittäjän idean toimialaan.
-                                    Sisällytä vastaukseen aina rahoitusehdotus.
-                                    Jokaisen antamasi vastauksen lopussa, kutsu käyttäjä ottamaan yhteyttä yhteen Lapin AMK:n edustajaan. 
-                                    Käytä kutsussa vain edustajan etunimeä ja sähköpostiosoitetta.
-                                    AMK-edustajien yhteystiedot ovat tässä tietokannan taulussa: ${contactsString}.
-                                    Vastauksen alussa tervehdi yrittäjää ystävällisesti.
-                                    Anna vähintään 3 ehdotusta ja rahoitusehdotus erikseen. Älä käytä erikoismerkkejä, kuten * tai ". Jäsentele listä ehdotuksista seuraavanlaisesti:
-
-                                    1. ""ehdotuksesi nimi: ""
-                                    
-                                    2. ""ehdotuksesi nimi: ""
-
-                                    3. ""ehdotuksesi nimi: ""
-
-                                    jne.
-
-                                    `},
-        { role: 'user', content: query }],
+        { 
+          role: 'system', 
+          content: `Olet avulias avustaja. Tehtäväsi on auttaa yrittäjiä kehittämään heidän hankeideoitaan Pohjois-Suomen eli Lapin alueella. 
+                    Anna yrittäjälle suosituksia ja parannusehdotuksia hänen ideaansa. Pyri välttämään liian yleisiä suosituksia,
+                    kuten tarpeiden kartoitus tai käyttäjäystävällisyyteen liittyvät seikat. Tarkenna ehdotukset yrittäjän idean toimialaan.
+                    Anna erityisesti ehdotuksia, jotka ovat hyödyllisiä hankkeen toteuttamisen kannalta.
+                    Sisällytä vastaukseen aina rahoitusehdotus, jossa mainitset kaikki mahdolliset rahoituslähteet, jotka ovat kyseiselle hankkeelle relevantteja.
+                    Jokaisen antamasi vastauksen lopussa, kutsu käyttäjä ottamaan yhteyttä yhteen Lapin AMK:n edustajaan. 
+                    Käytä kutsussa vain edustajan etunimeä ja sähköpostiosoitetta.
+                    AMK-edustajien yhteystiedot ovat tässä tietokannan taulussa: ${contactsString}.
+                    Vastauksen alussa tervehdi yrittäjää ystävällisesti.
+                    Anna vähintään 3 ehdotusta ja rahoitusehdotus erikseen. Anna ehdotukset ilman numerointia tai erikoismerkkejä.`
+        },
+        { 
+          role: 'user', 
+          content: query 
+        }
+      ],
+      max_tokens: 1200,
       model: 'gpt-4o',
       stream: false,
     })
@@ -77,8 +76,8 @@ Deno.serve(async (req) => {
     return new Response(String('Internal server error'), {status: 500});
   }
 
-  return new Response(reply, {
+  return new Response(JSON.stringify({ reply }), {
     status: 200,
-    headers: { 'Content-Type': 'text/plain', ...corsHeaders },
+    headers: { 'Content-Type': 'application/json', ...corsHeaders },
   })
 })

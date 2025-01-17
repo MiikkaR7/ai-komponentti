@@ -14,7 +14,8 @@ const App = () => {
       const { data, error } = await supabase.functions.invoke('hankeai', {
         body: { query: event.target[0].value }
       });
-      setSupabaseResponseState(data);
+      console.log(data.reply);
+      setSupabaseResponseState(data.reply);
     } catch (error) {
       console.log(error);
     }
@@ -26,11 +27,13 @@ const App = () => {
         <form onSubmit={handleSubmit}>
           <label>
             Hankeidea:
-            <textarea cols="60" rows="10" type="text" id="hanke" name="hankeidea"></textarea>
+            <textarea className="ai-kentta" cols="60" rows="10" type="text" id="hanke" name="hankeidea"></textarea>
           </label>
           <input type="submit" value="Sparraa"></input>
         </form>
-        <div>{supabaseResponseState}</div>
+        <div>{supabaseResponseState.split('\n').map((line, index) => (
+          <p key={index}>{line}</p>
+        ))}</div>
       </div>
     );
   }
