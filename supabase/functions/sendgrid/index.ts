@@ -10,9 +10,13 @@ sgMail.setApiKey(Deno.env.get('SENDGRID_KEY') ?? "");
 
 Deno.serve(async (req) => {
 
-  try {
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders });
+  }
 
-    //const { sposti } = await req.json();
+  //const { sposti } = await req.json();
+
+  try {
 
     const msg = {
       to: 'miikkariipi22@gmail.com',
