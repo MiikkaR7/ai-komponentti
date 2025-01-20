@@ -28,6 +28,9 @@ const App = () => {
       const hanke = formData.get("lomakehanke");
       const edustaja = formData.get("lomakevalikko");
       console.log(nimi + " " + sposti + " " + hanke + " " + edustaja);
+      const { data, error } = await supabase.functions.invoke('sendgrid', {
+        body: { sposti: sposti }
+      });
     } catch (error) {
       console.log(error);
     }
@@ -49,7 +52,7 @@ const App = () => {
           <input name="lomakesposti" className="yhteydenottolomake-sposti" placeholder="Sähköpostiosoite"></input>
           <input name="lomakehanke" className="yhteydenottolomake-hanke" placeholder="Hankeidea"></input>
           <select name="lomakevalikko" className="yhteydenottolomake-valikko">
-            <option value="miikka.riipi@testi.com">miikka.riipi@testi.com</option>
+            <option value="miikka.riipi@testi.com">miikkariipi22@gmail.com</option>
           </select>
           <textarea className="yhteydenottolomake-viesti" placeholder="Viesti" cols="100" rows="10" type="text" id="viesti" name="hankeviesti"/>
           <input className="yhteydenottolomake-nappi" type="submit" value="Lähetä"/>

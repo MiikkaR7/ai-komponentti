@@ -7,6 +7,8 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+
+
 (BigInt.prototype as any).toJSON = function () {
   return this.toString();
 };
@@ -53,7 +55,7 @@ Deno.serve(async (req) => {
                     Anna yrittäjälle suosituksia ja parannusehdotuksia hänen ideaansa. Pyri välttämään liian yleisiä suosituksia,
                     kuten tarpeiden kartoitus tai käyttäjäystävällisyyteen liittyvät seikat. Tarkenna ehdotukset yrittäjän idean toimialaan.
                     Anna erityisesti ehdotuksia, jotka ovat hyödyllisiä hankkeen toteuttamisen kannalta.
-                    Sisällytä vastaukseen aina rahoitusehdotus, jossa mainitset kaikki mahdolliset rahoituslähteet, jotka ovat kyseiselle hankkeelle relevantteja.
+                    Sisällytä vastaukseen aina rahoitusehdotus, jossa mainitset rahoituslähteitä, jotka ovat kyseiselle hankkeelle relevantteja.
                     Jokaisen antamasi vastauksen lopussa, kutsu käyttäjä ottamaan yhteyttä yhteen Lapin AMK:n edustajaan. 
                     Käytä kutsussa vain edustajan etunimeä ja sähköpostiosoitetta. 
                     Valitse sopivin edustaja vertaamalla yrittäjän antamaa hankeideaa edustajien kuvaus-sarakkeeseen. 
