@@ -7,6 +7,7 @@ const App = () => {
   const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
   const [supabaseResponseState, setSupabaseResponseState] = useState('');
+  const [formState, setFormState] = useState([]);
 
   const handleSubmit = async (event) => {
     try {
@@ -22,18 +23,34 @@ const App = () => {
   }
 
   const handleContactForm = async (formData) => {
-    try {
-      const nimi = formData.get("lomakenimi");
-      const sposti = formData.get("lomakesposti");
-      const hanke = formData.get("lomakehanke");
-      const edustaja = formData.get("lomakevalikko");
-      console.log(nimi + " " + sposti + " " + hanke + " " + edustaja);
-      const { data, error } = await supabase.functions.invoke('sendgrid', {
-        body: { sposti: sposti }
-      });
-    } catch (error) {
-      console.log(error);
-    }
+
+    const nimi = formData.get("lomakenimi");
+    const sposti = formData.get("lomakesposti");
+    const hanke = formData.get("lomakehanke");
+    const edustaja = formData.get("lomakevalikko");
+    const viesti = formData.get("lomakeviesti");
+
+    const message = [
+        nimi,
+        sposti,
+        hanke,
+        edustaja,
+        viesti
+      ];
+
+      try {
+
+          console.log("Nimi: " + nimi + " Sposti: " + sposti + " Idea: " + hanke + " Vastaanottaja: " + edustaja + " Viesti: " + viesti);
+          const { data, error } = await supabase.functions.invoke('sendgrid', {
+          body: { message }
+
+      }); 
+        
+      } catch (error) {
+        
+        console.log(error);
+
+      } 
   }
 
     return (
@@ -47,14 +64,21 @@ const App = () => {
           <p key={index}>{line}</p>
         ))}</div>
         <h1 className="yhteydenottolomake-otsikko">Ota yhteyttä</h1>
-        <form className="yhteydenottolomake" action={handleContactForm}>
+        <form
+        className="yhteydenottolomake"
+        onSubmit={(e) => {
+          e.preventDefault();
+          const formData = new FormData(e.target);
+          handleContactForm(formData);
+        }}
+        >
           <input name="lomakenimi" className="yhteydenottolomake-nimi" placeholder="Nimi"></input>
           <input name="lomakesposti" className="yhteydenottolomake-sposti" placeholder="Sähköpostiosoite"></input>
           <input name="lomakehanke" className="yhteydenottolomake-hanke" placeholder="Hankeidea"></input>
           <select name="lomakevalikko" className="yhteydenottolomake-valikko">
-            <option value="miikka.riipi@testi.com">miikkariipi22@gmail.com</option>
+            <option value="miikkariipi22@gmail.com">miikkariipi22@gmail.com</option>
           </select>
-          <textarea className="yhteydenottolomake-viesti" placeholder="Viesti" cols="100" rows="10" type="text" id="viesti" name="hankeviesti"/>
+          <textarea name="lomakeviesti" className="yhteydenottolomake-viesti" placeholder="Viesti" cols="100" rows="10" type="text" id="viesti"/>
           <input className="yhteydenottolomake-nappi" type="submit" value="Lähetä"/>
         </form>
       </div>

@@ -8,24 +8,32 @@ const corsHeaders = {
 
 sgMail.setApiKey(Deno.env.get('SENDGRID_KEY') ?? "");
 
+let response;
+
 Deno.serve(async (req) => {
 
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
-  //const { sposti } = await req.json();
+  //StackOverflow fix to enable accessing req object
+
+  const origin = req.headers.get('Origin');
+  console.log('origin is :', origin);
+
+  const message = await req.json();
 
   try {
 
     const msg = {
-      to: 'miikkariipi22@gmail.com',
-      from: 'miikka.riipi@gmail.com',
-      subject: 'SendGrid',
-      text: 'Esimerkkisähköposti',
+      from: Deno.env.get('SENDGRID_SENDER') ?? '',
+      replyTo: message.message[1],
+      subject: message.message[2],
+      to: message.message[3],
+      text: message.message[4],
   };
 
-    await sgMail.send(msg);
+    response = await sgMail.send(msg);
 
   } catch (error) {
 
@@ -34,7 +42,7 @@ Deno.serve(async (req) => {
 
   }
   
-  return new Response(String('Email sent succesfully'), {
+  return new Response((JSON.stringify(response)), {
     status: 202,
     headers: { 
       'Content-Type': 'application/json',
