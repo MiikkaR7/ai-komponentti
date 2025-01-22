@@ -7,7 +7,6 @@ const App = () => {
   const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
   const [supabaseResponseState, setSupabaseResponseState] = useState('');
-  const [formState, setFormState] = useState([]);
 
   const handleSubmit = async (event) => {
     try {
@@ -66,18 +65,20 @@ const App = () => {
         <h1 className="yhteydenottolomake-otsikko">Ota yhteyttä</h1>
         <form
         className="yhteydenottolomake"
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
           const formData = new FormData(e.target);
-          handleContactForm(formData);
+          await handleContactForm(formData);
         }}
         >
-          <input name="lomakenimi" className="yhteydenottolomake-nimi" placeholder="Nimi"></input>
-          <input name="lomakesposti" className="yhteydenottolomake-sposti" placeholder="Sähköpostiosoite"></input>
-          <input name="lomakehanke" className="yhteydenottolomake-hanke" placeholder="Hankeidea"></input>
-          <select name="lomakevalikko" className="yhteydenottolomake-valikko">
-            <option value="miikkariipi22@gmail.com">miikkariipi22@gmail.com</option>
-          </select>
+          <div className="yhteydenottolomake-kentat">
+            <input name="lomakenimi" className="yhteydenottolomake-nimi" placeholder="Nimi"></input>
+            <input name="lomakesposti" className="yhteydenottolomake-sposti" placeholder="Sähköpostiosoite"></input>
+            <input name="lomakehanke" className="yhteydenottolomake-hanke" placeholder="Hankeidea"></input>
+            <select name="lomakevalikko" className="yhteydenottolomake-valikko">
+              <option value="miikkariipi22@gmail.com">miikkariipi22@gmail.com</option>
+            </select>
+          </div>
           <textarea name="lomakeviesti" className="yhteydenottolomake-viesti" placeholder="Viesti" cols="100" rows="10" type="text" id="viesti"/>
           <input className="yhteydenottolomake-nappi" type="submit" value="Lähetä"/>
         </form>

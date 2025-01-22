@@ -80,6 +80,19 @@ body {
     margin-bottom: 20px;
 }
 
+.yhteydenottolomake-kentat {
+    justify-self: center;
+    justify-content: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    width: 400px;
+}
+
+.yhteydenottolomake-valikko {
+    width: 177px;
+}
+
 .yhteydenottolomake-viesti {
     width: 100%;
     box-sizing: border-box;

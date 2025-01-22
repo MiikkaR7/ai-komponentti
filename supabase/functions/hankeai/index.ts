@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
 
     // Tietokannasta haetaan yhteystiedot. Tekoäly käsittelee yhteystiedot
 
-    const fetchContactsFromDb = await connection.queryObject('SELECT * FROM contacts');
+    const fetchContactsFromDb = await connection.queryObject('SELECT (etunimi, sahkopostiosoite, kuvaus, avainsanat) FROM contacts');
     const contacts = fetchContactsFromDb.rows;
     const contactsString = JSON.stringify(contacts);
 
@@ -49,22 +49,22 @@ Deno.serve(async (req) => {
 
     const chatCompletion = await openai.chat.completions.create({
       messages: [
-        { 
+        {
           role: 'system', 
-          content: `Olet avulias avustaja. Tehtäväsi on auttaa yrittäjiä kehittämään heidän hankeideoitaan Pohjois-Suomen eli Lapin alueella. 
+          content: `Rajoita vastaus noin tuhanteen merkkiin.
+                    Olet avulias avustaja. Tehtäväsi on auttaa yrittäjiä kehittämään heidän hankeideoitaan Pohjois-Suomen eli Lapin alueella. 
                     Anna yrittäjälle suosituksia ja parannusehdotuksia hänen ideaansa. Pyri välttämään liian yleisiä suosituksia,
                     kuten tarpeiden kartoitus tai käyttäjäystävällisyyteen liittyvät seikat. Tarkenna ehdotukset yrittäjän idean toimialaan.
-                    Anna erityisesti ehdotuksia, jotka ovat hyödyllisiä hankkeen toteuttamisen kannalta.
                     Sisällytä vastaukseen aina rahoitusehdotus, jossa mainitset rahoituslähteitä, jotka ovat kyseiselle hankkeelle relevantteja.
+                    Anna vähintään 3 ehdotusta ja rahoitusehdotus erikseen. Anna ehdotukset ilman numerointia tai erikoismerkkejä.
+                    Vastauksen alussa tervehdi yrittäjää ystävällisesti.
                     Jokaisen antamasi vastauksen lopussa, kutsu käyttäjä ottamaan yhteyttä yhteen Lapin AMK:n edustajaan. 
                     Käytä kutsussa vain edustajan etunimeä ja sähköpostiosoitetta. 
                     Valitse sopivin edustaja vertaamalla yrittäjän antamaa hankeideaa edustajien kuvaus-sarakkeeseen. 
                     Jos hankeidea soveltuu useammalle edustajalle, käytä edelleen avainsanat-saraketta, ja vertaa sitä hankeideaan.
-                    AMK-edustajien yhteystiedot ja kuvaus ovat tässä tietokannan taulussa: ${contactsString}.
-                    Vastauksen alussa tervehdi yrittäjää ystävällisesti.
-                    Anna vähintään 3 ehdotusta ja rahoitusehdotus erikseen. Anna ehdotukset ilman numerointia tai erikoismerkkejä.`
+                    AMK-edustajien yhteystiedot ja kuvaus ovat tässä tietokannan taulussa: ${contactsString}.`
         },
-        { 
+        {
           role: 'user', 
           content: query 
         }
