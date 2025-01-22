@@ -6,16 +6,22 @@ const App = () => {
 
   const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
-  const [supabaseResponseState, setSupabaseResponseState] = useState('');
+  const [supabaseResponseState, setSupabaseResponseState] = useState(
+  <div className="ai-response"></div>
+  );
 
   const handleSubmit = async (event) => {
+    setSupabaseResponseState(<div className="loading-spinner"></div>);
     try {
       event.preventDefault();
       const { data, error } = await supabase.functions.invoke('hankeai', {
         body: { query: event.target[0].value }
       });
-      console.log(data.reply);
-      setSupabaseResponseState(data.reply);
+      setSupabaseResponseState(
+      <div className="ai-response">{data.reply.split('\n').map((line, index) => (
+        <p key={index}>{line}</p>
+      ))}</div>
+      );
     } catch (error) {
       console.log(error);
     }
@@ -57,9 +63,7 @@ const App = () => {
             <textarea className="user-prompt-form-textarea" placeholder="Kirjoita hankeideasi tähän..." cols="100" rows="10" type="text"/>
           <input className="user-prompt-form-button" type="submit" value="Sparraa"/>
         </form>
-        <div className="ai-response">{supabaseResponseState.split('\n').map((line, index) => (
-          <p key={index}>{line}</p>
-        ))}</div>
+        {supabaseResponseState}
         <h1 className="contact-form-header">Ota yhteyttä</h1>
         <form
         className="contact-form"
