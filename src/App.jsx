@@ -23,26 +23,22 @@ const App = () => {
 
   const handleContactForm = async (formData, formElement) => {
 
-    const nimi = formData.get("lomakenimi");
     const sposti = formData.get("lomakesposti");
     const hanke = formData.get("lomakehanke");
     const edustaja = formData.get("lomakevalikko");
     const viesti = formData.get("lomakeviesti");
-
-    const message = [
-        nimi,
-        sposti,
-        hanke,
-        edustaja,
-        viesti
-      ];
 
       formElement.reset();
 
       try {
 
           const { data, error } = await supabase.functions.invoke('sendgrid', {
-          body: { message }
+          body: { 
+            aihe: hanke,
+            lahettaja: sposti,
+            vastaanottaja: edustaja,
+            viesti: viesti 
+          }
 
       });
         

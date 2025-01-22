@@ -27,10 +27,10 @@ Deno.serve(async (req) => {
 
     const msg = {
       from: Deno.env.get('SENDGRID_SENDER') ?? '',
-      replyTo: message.message[1],
-      subject: message.message[2],
-      to: message.message[3],
-      text: message.message[4],
+      replyTo: message.lahettaja,
+      subject: message.aihe,
+      to: message.vastaanottaja,
+      text: message.viesti,
   };
 
     response = await sgMail.send(msg);
