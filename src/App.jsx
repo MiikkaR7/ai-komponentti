@@ -23,10 +23,10 @@ const App = () => {
 
   const handleContactForm = async (formData, formElement) => {
 
-    const sposti = formData.get("lomakesposti");
-    const hanke = formData.get("lomakehanke");
-    const edustaja = formData.get("lomakevalikko");
-    const viesti = formData.get("lomakeviesti");
+    const hankeaihe = formData.get("contact-form-subject");
+    const sposti = formData.get("contact-form-sender");
+    const edustaja = formData.get("contact-form-recipient");
+    const viesti = formData.get("contact-form-message");
 
       formElement.reset();
 
@@ -34,7 +34,7 @@ const App = () => {
 
           const { data, error } = await supabase.functions.invoke('sendgrid', {
           body: { 
-            aihe: hanke,
+            aihe: hankeaihe,
             lahettaja: sposti,
             vastaanottaja: edustaja,
             viesti: viesti 
@@ -52,33 +52,33 @@ const App = () => {
 
     return (
       <div className="ai-komponentti">
-        <h1 className="komponentti-otsikko">Hankeideatyökalu</h1>
-        <form className="hankeidea" onSubmit={handleSubmit}>
-            <textarea className="ai-kentta" placeholder="Kirjoita hankeideasi tähän..." cols="100" rows="10" type="text" id="hanke" name="hankeidea"/>
-          <input className="hankeidea-nappi" type="submit" value="Sparraa"/>
+        <h1 className="komponentti-header">Hankeideatyökalu</h1>
+        <form className="user-prompt-form" onSubmit={handleSubmit}>
+            <textarea className="user-prompt-form-textarea" placeholder="Kirjoita hankeideasi tähän..." cols="100" rows="10" type="text"/>
+          <input className="user-prompt-form-button" type="submit" value="Sparraa"/>
         </form>
-        <div className="ai-vastaus">{supabaseResponseState.split('\n').map((line, index) => (
+        <div className="ai-response">{supabaseResponseState.split('\n').map((line, index) => (
           <p key={index}>{line}</p>
         ))}</div>
-        <h1 className="yhteydenottolomake-otsikko">Ota yhteyttä</h1>
+        <h1 className="contact-form-header">Ota yhteyttä</h1>
         <form
-        className="yhteydenottolomake"
+        className="contact-form"
         onSubmit={async (e) => {
           e.preventDefault();
           const formData = new FormData(e.target);
           await handleContactForm(formData, e.target);
         }}
         >
-          <div className="yhteydenottolomake-kentat">
-            <input name="lomakenimi" className="yhteydenottolomake-nimi" placeholder="Nimi"></input>
-            <input name="lomakesposti" className="yhteydenottolomake-sposti" placeholder="Sähköpostiosoite"></input>
-            <input name="lomakehanke" className="yhteydenottolomake-hanke" placeholder="Hankeidea"></input>
-            <select name="lomakevalikko" className="yhteydenottolomake-valikko">
+          <div className="contact-form-inputs">
+            <input name="contact-form-name" placeholder="Nimi"></input>
+            <input name="contact-form-sender" placeholder="Sähköpostiosoite"></input>
+            <input name="contact-form-subject" placeholder="Hankeidea"></input>
+            <select name="contact-form-recipient" className="contact-form-select">
               <option value="miikkariipi22@gmail.com">miikkariipi22@gmail.com</option>
             </select>
           </div>
-          <textarea name="lomakeviesti" className="yhteydenottolomake-viesti" placeholder="Viesti" cols="100" rows="10" type="text" id="viesti"/>
-          <input className="yhteydenottolomake-nappi" type="submit" value="Lähetä"/>
+          <textarea name="contact-form-message" className="contact-form-textarea" placeholder="Viesti" cols="100" rows="10" type="text"/>
+          <input className="contact-form-button" type="submit" value="Lähetä"/>
         </form>
       </div>
     );
