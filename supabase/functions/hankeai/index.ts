@@ -41,7 +41,7 @@ Deno.serve(async (req) => {
 
     // Tietokannasta haetaan yhteystiedot. Tekoäly käsittelee yhteystiedot
 
-    const fetchContactsFromDb = await connection.queryObject('SELECT (etunimi, sahkopostiosoite, kuvaus, avainsanat) FROM contacts');
+    const fetchContactsFromDb = await connection.queryObject('SELECT (etunimi, sahkopostiosoite, avainsanat) FROM contacts');
     const contacts = fetchContactsFromDb.rows;
     const contactsString = JSON.stringify(contacts);
 
@@ -58,10 +58,8 @@ Deno.serve(async (req) => {
                     Sisällytä vastaukseen aina rahoitusehdotus, jossa mainitset rahoituslähteitä, jotka ovat kyseiselle hankkeelle relevantteja.
                     Anna vähintään 3 ehdotusta ja rahoitusehdotus erikseen. Anna ehdotukset ilman numerointia tai erikoismerkkejä.
                     Vastauksen alussa tervehdi yrittäjää ystävällisesti.
-                    Jokaisen antamasi vastauksen lopussa, kutsu käyttäjä ottamaan yhteyttä yhteen Lapin AMK:n edustajaan. 
-                    Käytä kutsussa vain edustajan etunimeä ja sähköpostiosoitetta. 
-                    Valitse sopivin edustaja vertaamalla yrittäjän antamaa hankeideaa edustajien kuvaus-sarakkeeseen. 
-                    Jos hankeidea soveltuu useammalle edustajalle, käytä edelleen avainsanat-saraketta, ja vertaa sitä hankeideaan.
+                    Valitse sopivat edustajat vertaamalla yrittäjän antamaa hankeideaa edustajien avainsanat-sarakkeeseen.
+                    Kutsu yrittäjä ottamaan yhteyttä niihin edustajiin, joiden kuvaus ja avainsanat liittyvät yrittäjän antamaan hankeideaan.
                     AMK-edustajien yhteystiedot ja kuvaus ovat tässä tietokannan taulussa: ${contactsString}.`
         },
         {
@@ -83,4 +81,4 @@ Deno.serve(async (req) => {
     status: 200,
     headers: { 'Content-Type': 'application/json', ...corsHeaders },
   })
-})
+});
