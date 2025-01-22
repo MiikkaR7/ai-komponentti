@@ -21,7 +21,7 @@ const App = () => {
     }
   }
 
-  const handleContactForm = async (formData) => {
+  const handleContactForm = async (formData, formElement) => {
 
     const nimi = formData.get("lomakenimi");
     const sposti = formData.get("lomakesposti");
@@ -37,19 +37,21 @@ const App = () => {
         viesti
       ];
 
+      formElement.reset();
+
       try {
 
-          console.log("Nimi: " + nimi + " Sposti: " + sposti + " Idea: " + hanke + " Vastaanottaja: " + edustaja + " Viesti: " + viesti);
           const { data, error } = await supabase.functions.invoke('sendgrid', {
           body: { message }
 
-      }); 
+      });
         
       } catch (error) {
         
         console.log(error);
 
-      } 
+      }
+
   }
 
     return (
@@ -68,7 +70,7 @@ const App = () => {
         onSubmit={async (e) => {
           e.preventDefault();
           const formData = new FormData(e.target);
-          await handleContactForm(formData);
+          await handleContactForm(formData, e.target);
         }}
         >
           <div className="yhteydenottolomake-kentat">
