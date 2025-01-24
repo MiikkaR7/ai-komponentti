@@ -1,5 +1,8 @@
 node_modules/
 .vscode/
+dist/591.hankeai.bundle.js
+dist/hankeai.bundle.js
+dist/index.html
 supabase/.temp/
 supabase/.temp/cli-latest
 supabase/.branches/
