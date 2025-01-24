@@ -8,7 +8,8 @@ module.exports = {
     plugins: [
         new webpack.EnvironmentPlugin(['SUPABASE_URL', 'SUPABASE_ANON_KEY']),
         new HtmlWebpackPlugin({
-            title: 'Static Site'
+            title: 'Static Site',
+            template: './src/index.html'
         }),
     ],
     output: { 
