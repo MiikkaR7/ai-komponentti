@@ -6,11 +6,14 @@ const App = () => {
 
   const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
+  const [contactFormVisibilityState, setContactFormVisibilityState] =useState(true);
+
   const [supabaseResponseState, setSupabaseResponseState] = useState(
   <div className="ai-response"></div>
   );
 
   const handleSubmit = async (event) => {
+    setContactFormVisibilityState(false);
     setSupabaseResponseState(<div className="loading-spinner"></div>);
     try {
       event.preventDefault();
@@ -22,6 +25,7 @@ const App = () => {
         <p key={index}>{line}</p>
       ))}</div>
       );
+      setContactFormVisibilityState(true);
     } catch (error) {
       console.log(error);
     }
@@ -58,11 +62,13 @@ const App = () => {
 
   }
 
+  if (contactFormVisibilityState) {
+
     return (
-      <div className="ai-komponentti">
+    <div className="ai-komponentti">
         <h1 className="komponentti-header">Hankeideatyökalu</h1>
         <form className="user-prompt-form" onSubmit={handleSubmit}>
-            <textarea className="user-prompt-form-textarea" placeholder="Kirjoita hankeideasi tähän..." cols="100" rows="10" type="text"/>
+            <textarea className="user-prompt-form-textarea" placeholder="Kirjoita hankeideasi tähän..." cols="100" rows="10" type="text" maxlength="544" required/>
           <input className="user-prompt-form-button" type="submit" value="Sparraa"/>
         </form>
         {supabaseResponseState}
@@ -76,18 +82,54 @@ const App = () => {
         }}
         >
           <div className="contact-form-inputs">
-            <input name="contact-form-name" placeholder="Nimi"></input>
-            <input name="contact-form-sender" placeholder="Sähköpostiosoite"></input>
-            <input name="contact-form-subject" placeholder="Hankeidea"></input>
+            <input name="contact-form-name" placeholder="Nimi" required></input>
+            <input name="contact-form-sender" placeholder="Sähköpostiosoite" type="email" required></input>
+            <input name="contact-form-subject" placeholder="Hankeidea" required></input>
             <select name="contact-form-recipient" className="contact-form-select">
               <option value="miikka@testi.fi">miikka@testi.fi</option>
             </select>
           </div>
-          <textarea name="contact-form-message" className="contact-form-textarea" placeholder="Viesti" cols="100" rows="10" type="text"/>
+          <textarea name="contact-form-message" placeholder="Viesti" className="contact-form-textarea" type="text" cols="100" rows="10" required/>
           <input className="contact-form-button" type="submit" value="Lähetä"/>
         </form>
       </div>
     );
+
+  } else {
+
+    return (
+      <div className="ai-komponentti">
+          <h1 className="komponentti-header">Hankeideatyökalu</h1>
+          <form className="user-prompt-form" onSubmit={handleSubmit}>
+              <textarea className="user-prompt-form-textarea" placeholder="Kirjoita hankeideasi tähän..." cols="100" rows="10" type="text" maxlength="544" required/>
+            <input className="user-prompt-form-button" type="submit" value="Sparraa"/>
+          </form>
+          {supabaseResponseState}
+          <h1 className="contact-form-header-hidden">Ota yhteyttä</h1>
+          <form
+          className="contact-form-hidden"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            await handleContactForm(formData, e.target);
+          }}
+          >
+            <div className="contact-form-inputs">
+              <input name="contact-form-name" placeholder="Nimi" required></input>
+              <input name="contact-form-sender" placeholder="Sähköpostiosoite" type="email" required></input>
+              <input name="contact-form-subject" placeholder="Hankeidea" required></input>
+              <select name="contact-form-recipient" className="contact-form-select">
+                <option value="miikka@testi.fi">miikka@testi.fi</option>
+              </select>
+            </div>
+            <textarea name="contact-form-message" placeholder="Viesti" className="contact-form-textarea" type="text" cols="100" rows="10" required/>
+            <input className="contact-form-button" type="submit" value="Lähetä"/>
+          </form>
+        </div>
+      );
+
   }
+
+}
 
 export default App;
