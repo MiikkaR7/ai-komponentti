@@ -1,0 +1,142 @@
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #f9f9f9;
+}
+
+.ai-komponentti {
+    text-align: center;
+    width: 80%;
+    width: 500px;
+    padding: 20px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+}
+
+.komponentti-header {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.user-prompt-form {
+    margin-bottom: 20px;
+}
+
+.user-prompt-form-textarea {
+    width: 100%;
+    box-sizing: border-box;
+    height: 150px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+    resize: none;
+    margin: 0 auto;
+}
+
+
+.user-prompt-form-button {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.user-prompt-form-button:hover {
+    background-color: #0056b3;
+}
+
+.ai-response {
+    height: 150px;
+    overflow-y: auto;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f8f9fa;
+    text-align: left;
+    white-space: pre-wrap;
+    font-size: 14px;
+    color: #333;
+}
+
+.contact-form-header {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.contact-form {
+    margin-bottom: 20px;
+}
+
+.contact-form-inputs {
+    justify-self: center;
+    justify-content: center;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    width: 400px;
+}
+
+.contact-form-select {
+    width: 177px;
+}
+
+.contact-form-textarea {
+    width: 100%;
+    box-sizing: border-box;
+    height: 150px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    font-family: Arial, sans-serif;
+    resize: none;
+    margin: 0 auto;
+    margin-top: 10px;
+}
+
+.contact-form-button {
+    display: inline-block;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.contact-form-button:hover {
+    background-color: #0056b3;
+}
+
+.loading-spinner {
+    margin: 0 auto;
+    border: 10px solid #f3f3f3;
+    border-top: 10px solid #007bff;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
+  }
