@@ -29,6 +29,8 @@ const App = () => {
 
   const handleContactForm = async (formData, formElement) => {
 
+    //TODO: implement verified sender address and real recipients
+
     const hankeaihe = formData.get("contact-form-subject");
     const sposti = formData.get("contact-form-sender");
     const edustaja = formData.get("contact-form-recipient");
@@ -78,7 +80,7 @@ const App = () => {
             <input name="contact-form-sender" placeholder="Sähköpostiosoite"></input>
             <input name="contact-form-subject" placeholder="Hankeidea"></input>
             <select name="contact-form-recipient" className="contact-form-select">
-              <option value="miikkariipi22@gmail.com">miikkariipi22@gmail.com</option>
+              <option value="miikka@testi.fi">miikka@testi.fi</option>
             </select>
           </div>
           <textarea name="contact-form-message" className="contact-form-textarea" placeholder="Viesti" cols="100" rows="10" type="text"/>
