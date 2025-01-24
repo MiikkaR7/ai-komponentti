@@ -1,5 +1,7 @@
 node_modules/
 .vscode/
+dist/591.js
+dist/main.js
 supabase/.temp/
 supabase/.temp/cli-latest
 supabase/.branches/
