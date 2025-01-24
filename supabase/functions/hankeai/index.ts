@@ -1,12 +1,13 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import * as postgres from 'https://deno.land/x/postgres@v0.17.0/mod.ts';
 import OpenAI from 'https://deno.land/x/openai@v4.24.0/mod.ts'
+import { Ratelimit } from "https://cdn.skypack.dev/@upstash/ratelimit@latest";
+import { Redis } from "https://esm.sh/@upstash/redis@1.34.3";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
-
 
 
 (BigInt.prototype as any).toJSON = function () {
@@ -15,7 +16,7 @@ const corsHeaders = {
 
 // Tietokantayhteys
 const databaseUrl = Deno.env.get('SUPABASE_DB_URL');
-const pool = new postgres.Pool(databaseUrl, 10, true);
+const pool = new postgres.Pool(databaseUrl, 100, true);
 const connection = await pool.connect();
 
 Deno.serve(async (req) => {
@@ -38,6 +39,26 @@ Deno.serve(async (req) => {
   let reply;
 
   try {
+
+    //Rate limit
+
+    const redis = new Redis({
+      url: Deno.env.get('UPSTASH_REDIS_REST_URL')!,
+      token: Deno.env.get('UPSTASH_REDIS_REST_TOKEN')!,
+    });
+    
+    const rateLimit = new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(1, '60 s'),
+      analytics: true,
+    });
+    
+    const identifier = 'api';
+    const { success } = await rateLimit.limit(identifier);
+    
+    if (!success) {
+      throw new Error('Limit exceeded');
+    }
 
     // Tietokannasta haetaan yhteystiedot. Tekoäly käsittelee yhteystiedot
 
@@ -67,14 +88,15 @@ Deno.serve(async (req) => {
           content: query 
         }
       ],
-      model: 'gpt-4o',
+      model: 'gpt-4o-mini',
       stream: false,
     });
 
     reply = chatCompletion.choices[0].message.content;
 
-  } catch (_error) {
-    return new Response(String('Internal server error'), {status: 500});
+  } catch (error) {
+    console.log(error);
+    return new Response(JSON.stringify({error: error.message}), {status: 500});
   }
 
   return new Response(JSON.stringify({ reply }), {
