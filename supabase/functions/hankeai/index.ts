@@ -53,7 +53,7 @@ Deno.serve(async (req) => {
       analytics: true,
     });
     
-    const identifier = 'api';
+    const identifier = 'openAI-limit';
     const { success } = await rateLimit.limit(identifier);
     
     if (!success) {
@@ -78,9 +78,10 @@ Deno.serve(async (req) => {
                     kuten tarpeiden kartoitus tai käyttäjäystävällisyyteen liittyvät seikat. Tarkenna ehdotukset yrittäjän idean toimialaan.
                     Sisällytä vastaukseen aina rahoitusehdotus, jossa mainitset rahoituslähteitä, jotka ovat kyseiselle hankkeelle relevantteja.
                     Anna vähintään 3 ehdotusta ja rahoitusehdotus erikseen. Anna ehdotukset ilman numerointia tai erikoismerkkejä.
+                    Ehdotusten lopuksi anna 3 hyvin lyhyttä esimerkkiaihetta hankkeelle.
                     Vastauksen alussa tervehdi yrittäjää ystävällisesti.
                     Valitse sopivat edustajat vertaamalla yrittäjän antamaa hankeideaa edustajien avainsanat-sarakkeeseen.
-                    Kutsu yrittäjä ottamaan yhteyttä niihin edustajiin, joiden kuvaus ja avainsanat liittyvät yrittäjän antamaan hankeideaan.
+                    Kutsu yrittäjä ottamaan yhteyttä sähköpostin kautta niihin edustajiin, joiden kuvaus ja avainsanat liittyvät yrittäjän antamaan hankeideaan.
                     AMK-edustajien yhteystiedot ja kuvaus ovat tässä tietokannan taulussa: ${contactsString}.`
         },
         {
@@ -88,7 +89,7 @@ Deno.serve(async (req) => {
           content: query 
         }
       ],
-      model: 'gpt-4o-mini',
+      model: 'gpt-4o',
       stream: false,
     });
 
