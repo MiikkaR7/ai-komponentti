@@ -7,15 +7,17 @@ const App = () => {
   const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
   const [contactFormVisibilityState, setContactFormVisibilityState] =useState(true);
-
   const [supabaseResponseState, setSupabaseResponseState] = useState(
   <div className="ai-response"></div>
   );
 
   const handleSubmit = async (event) => {
+
     setContactFormVisibilityState(false);
     setSupabaseResponseState(<div className="loading-spinner"></div>);
+
     try {
+
       event.preventDefault();
       const { data, error } = await supabase.functions.invoke('hankeai', {
         body: { query: event.target[0].value }
@@ -32,6 +34,7 @@ const App = () => {
     } catch (error) {
 
       console.log(error);
+      setContactFormVisibilityState(true);
       setSupabaseResponseState(
         <div className="ai-response-error">
           <p>Error: rate limit reached, try again later</p>
@@ -112,7 +115,7 @@ const App = () => {
           <h1 className="komponentti-header">Hankeideatyökalu</h1>
           <form className="user-prompt-form" onSubmit={handleSubmit}>
               <textarea className="user-prompt-form-textarea" placeholder="Kirjoita hankeideasi tähän..." cols="100" rows="10" type="text" maxlength="544" required/>
-            <input className="user-prompt-form-button" type="submit" value="Sparraa"/>
+            <input className="user-prompt-form-button-hidden" type="submit" value="Sparraa"/>
           </form>
           {supabaseResponseState}
           <h1 className="contact-form-header-hidden">Ota yhteyttä</h1>

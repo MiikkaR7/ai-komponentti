@@ -54,6 +54,10 @@ body {
     cursor: pointer;
 }
 
+.user-prompt-form-button-hidden {
+    visibility: hidden;
+}
+
 .user-prompt-form-button:hover {
     background-color: #0056b3;
 }
