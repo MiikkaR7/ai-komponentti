@@ -3766,7 +3766,17 @@
       "integrity": "sha512-b4JR1PFR10y1mKjhHY9LaGo6tmrgjit7hxVIeAmyMw3jegXR4dhYqLaQF5zMXZxY7tLpMyJeLjr1C4rLmkVe8g=="
     }
   },
+  "redirects": {
+    "https://esm.sh/@types/crypto-js@~4.2.2/enc-hex.d.ts": "https://esm.sh/@types/crypto-js@4.2.2/enc-hex.d.ts",
+    "https://esm.sh/@types/crypto-js@~4.2.2/sha1.d.ts": "https://esm.sh/@types/crypto-js@4.2.2/sha1.d.ts",
+    "https://esm.sh/@upstash/redis": "https://esm.sh/@upstash/redis@1.34.3",
+    "https://esm.sh/crypto-js@^4.2.0/enc-hex?target=denonext": "https://esm.sh/crypto-js@4.2.0/enc-hex?target=denonext",
+    "https://esm.sh/crypto-js@^4.2.0/sha1?target=denonext": "https://esm.sh/crypto-js@4.2.0/sha1?target=denonext"
+  },
   "remote": {
+    "https://cdn.skypack.dev/-/@upstash/core-analytics@v0.0.10-ZmX21TeWkis2FpTZYW09/dist=es2019,mode=imports/optimized/@upstash/core-analytics.js": "09b00006da191a6bb025bf2c7f91c2f58b43d269630e1ea238657ec845fa56fe",
+    "https://cdn.skypack.dev/-/@upstash/ratelimit@v2.0.5-aVmL6TfVoCQjImPJXh35/dist=es2019,mode=imports/optimized/@upstash/ratelimit.js": "4a7e6135ac56221f596f5024eb0df66027d66deecd8d970f00b58fe53d1e86ce",
+    "https://cdn.skypack.dev/@upstash/ratelimit@latest": "ff97853514bbe36395adcb37c0c419e8b6799d340540afaf00ac36a454a5ad6e",
     "https://deno.land/x/openai@v4.24.0/_shims/MultipartBody.ts": "fe06a56b54ae358c9cf99823096e34b36795fdba2e17513f0e9539210edd797d",
     "https://deno.land/x/openai@v4.24.0/_shims/mod.ts": "df7a905c0bd873d3dab745b9c63403594b1804131b5f533e1e72a2f2747cba74",
     "https://deno.land/x/openai@v4.24.0/core.ts": "f63dd18846582debcbf9834b944f1a65c879b6f9624466d97198291dc0915400",
@@ -3812,7 +3822,14 @@
     "https://deno.land/x/openai@v4.24.0/resources/shared.ts": "919082a633e2b16e9d83fd5e9af3b26af3dc24bbadf2e20c2862226b833de414",
     "https://deno.land/x/openai@v4.24.0/streaming.ts": "f360cf909b07562330ca75470ae26eecdc35f176af424b0f74ab673a5b242782",
     "https://deno.land/x/openai@v4.24.0/uploads.ts": "96dbd9e7e7b5a9bc3ff38e81f6c1372c2cdce28b38c704cd61c7daeb5494b6f9",
-    "https://deno.land/x/openai@v4.24.0/version.ts": "4dcd23aa866d3457edbef4309dfb9d3fd36f8723eee8dac587a3b0ab54874d10"
+    "https://deno.land/x/openai@v4.24.0/version.ts": "4dcd23aa866d3457edbef4309dfb9d3fd36f8723eee8dac587a3b0ab54874d10",
+    "https://esm.sh/@upstash/redis@1.34.3": "571b7edba95aaa4cb62dc680c3de5424cf89759a91c865354ac02b1547033ae8",
+    "https://esm.sh/@upstash/redis@1.34.3/denonext/chunk-FV6JMGNF.mjs": "562dbb3caf1327762d401d846dd54ec2aad0ede5c4e5d733e296ea71216ec1d2",
+    "https://esm.sh/@upstash/redis@1.34.3/denonext/redis.mjs": "6e7c89d5016614b59bece8a6721c71b266e2064178434935ae393b73d3277b5a",
+    "https://esm.sh/crypto-js@4.2.0/denonext/enc-hex.mjs": "d9b57ee9b036cb023e8c87f0063f616405c34f166327e6bc561ce36059eabfa6",
+    "https://esm.sh/crypto-js@4.2.0/denonext/sha1.mjs": "7c20a11f45d6390bfd5babfb769457ad42775bca38d140dc497e548a94f7745b",
+    "https://esm.sh/crypto-js@4.2.0/enc-hex?target=denonext": "e7bbfb366ad3cbea21a865f646e2dd1109398362c4779291bffb03bb6332310f",
+    "https://esm.sh/crypto-js@4.2.0/sha1?target=denonext": "60b6e4ce5897826e9f61dcc2a0cbf11a9431ef81cad376f7f1f2810c615e4e68"
   },
   "workspace": {
     "packageJson": {

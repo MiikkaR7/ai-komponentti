@@ -1,31 +1,13 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import * as postgres from 'https://deno.land/x/postgres@v0.17.0/mod.ts';
 import OpenAI from 'https://deno.land/x/openai@v4.24.0/mod.ts'
-import { Ratelimit } from "@upstash/ratelimit";
-import { Redis } from "@upstash/redis";
+import { Ratelimit } from "https://cdn.skypack.dev/@upstash/ratelimit@latest";
+import { Redis } from "https://esm.sh/@upstash/redis@1.34.3";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
-
-const ratelimit = new Ratelimit({
-  redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(100, "86400 s"),
-  analytics: true,
-  /**
-   * Optional prefix for the keys used in redis. This is useful if you want to share a redis
-   * instance with other applications and want to avoid key collisions. The default prefix is
-   * "@upstash/ratelimit"
-   */
-  prefix: "@upstash/ratelimit",
-});
-
-// Use a constant string to limit all requests with a single ratelimit
-// Or use a userID, apiKey or ip address for individual limits.
-const identifier = "api";
-const { success } = await ratelimit.limit(identifier);
-
 
 
 (BigInt.prototype as any).toJSON = function () {
@@ -34,7 +16,7 @@ const { success } = await ratelimit.limit(identifier);
 
 // Tietokantayhteys
 const databaseUrl = Deno.env.get('SUPABASE_DB_URL');
-const pool = new postgres.Pool(databaseUrl, 10, true);
+const pool = new postgres.Pool(databaseUrl, 100, true);
 const connection = await pool.connect();
 
 Deno.serve(async (req) => {
@@ -57,6 +39,26 @@ Deno.serve(async (req) => {
   let reply;
 
   try {
+
+    //Rate limit
+
+    const redis = new Redis({
+      url: Deno.env.get('UPSTASH_REDIS_REST_URL')!,
+      token: Deno.env.get('UPSTASH_REDIS_REST_TOKEN')!,
+    });
+    
+    const rateLimit = new Ratelimit({
+      redis,
+      limiter: Ratelimit.slidingWindow(2, '60 s'),
+      analytics: true,
+    });
+    
+    const identifier = 'api';
+    const { success } = await rateLimit.limit(identifier);
+    
+    if (!success) {
+      throw new Error('Limit exceeded');
+    }
 
     // Tietokannasta haetaan yhteystiedot. Tekoäly käsittelee yhteystiedot
 
@@ -92,8 +94,9 @@ Deno.serve(async (req) => {
 
     reply = chatCompletion.choices[0].message.content;
 
-  } catch (_error) {
-    return new Response(String('Internal server error'), {status: 500});
+  } catch (error) {
+    console.log(error);
+    return new Response(JSON.stringify({error: error.message}), {status: 500});
   }
 
   return new Response(JSON.stringify({ reply }), {
