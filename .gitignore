@@ -1,5 +1,4 @@
 node_modules/
-dist/main.js.LICENSE.txt
 .vscode/
 supabase/.temp/
 supabase/.temp/cli-latest
