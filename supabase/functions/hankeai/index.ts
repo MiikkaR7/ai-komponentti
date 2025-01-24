@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
     
     const rateLimit = new Ratelimit({
       redis,
-      limiter: Ratelimit.slidingWindow(1, '60 s'),
+      limiter: Ratelimit.slidingWindow(100, '84600 s'),
       analytics: true,
     });
     

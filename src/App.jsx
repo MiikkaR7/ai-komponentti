@@ -33,11 +33,11 @@ const App = () => {
 
       console.log(error);
       setSupabaseResponseState(
-        <div className="ai-response">
-          <p>Error!</p>
+        <div className="ai-response-error">
+          <p>Error: rate limit reached, try again later</p>
         </div>
       );
-      
+
     }
   }
 
