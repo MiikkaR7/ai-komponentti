@@ -16,14 +16,16 @@ Deno.serve(async (req) => {
     return new Response('ok', { headers: corsHeaders });
   }
 
-  //StackOverflow fix to enable accessing req object
+  //Have to interact with preflight request before parsing request body
 
   const origin = req.headers.get('Origin');
   console.log('origin is :', origin);
 
   const message = await req.json();
 
-  try {
+  //Email functionality (TODO: Verified sender address)
+
+  /* try {
 
     const msg = {
       from: Deno.env.get('SENDGRID_SENDER') ?? '',
@@ -40,9 +42,9 @@ Deno.serve(async (req) => {
     console.error(error);
     return new Response(String('Internal server error'), { status: 500 });
 
-  }
+  } */
   
-  return new Response((JSON.stringify(response)), {
+  return new Response((JSON.stringify(message)), {
     status: 202,
     headers: { 
       'Content-Type': 'application/json',
