@@ -1,13 +1,19 @@
 const path = require("node:path");
 const webpack = require("webpack");
 require('dotenv').config();
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 
 module.exports = {
     entry: "./src/index.js",
-    output: { path: path.resolve(__dirname, "dist") },
     plugins: [
-        new webpack.EnvironmentPlugin(['SUPABASE_URL', 'SUPABASE_ANON_KEY'])
+        new webpack.EnvironmentPlugin(['SUPABASE_URL', 'SUPABASE_ANON_KEY']),
+        new HtmlWebpackPlugin({
+            title: 'Static Site'
+        }),
     ],
+    output: { 
+        filename: 'hankeai.bundle.js',
+        path: path.resolve(__dirname, "dist") },
     module: {
         rules: [
             {
