@@ -71,6 +71,15 @@ body {
     color: #333;
 }
 
+.ai-response-error {
+    margin: 0 auto;
+    text-align: center;
+    font-size: 24px;
+    color: #333;
+    background-color: #f8f9fa;
+    padding: 10px;
+}
+
 .contact-form-header {
     font-size: 24px;
     margin-bottom: 20px;
