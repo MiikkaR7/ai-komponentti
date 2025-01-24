@@ -20,14 +20,24 @@ const App = () => {
       const { data, error } = await supabase.functions.invoke('hankeai', {
         body: { query: event.target[0].value }
       });
+
       setSupabaseResponseState(
-      <div className="ai-response">{data.reply.split('\n').map((line, index) => (
-        <p key={index}>{line}</p>
-      ))}</div>
-      );
+        <div className="ai-response">{data.reply.split('\n').map((line, index) => (
+          <p key={index}>{line}</p>
+        ))}</div>
+        );
+
       setContactFormVisibilityState(true);
+
     } catch (error) {
+
       console.log(error);
+      setSupabaseResponseState(
+        <div className="ai-response">
+          <p>Error!</p>
+        </div>
+      );
+      
     }
   }
 

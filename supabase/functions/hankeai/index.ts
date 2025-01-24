@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
     
     const rateLimit = new Ratelimit({
       redis,
-      limiter: Ratelimit.slidingWindow(2, '60 s'),
+      limiter: Ratelimit.slidingWindow(1, '60 s'),
       analytics: true,
     });
     
@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
           content: query 
         }
       ],
-      model: 'gpt-4o',
+      model: 'gpt-4o-mini',
       stream: false,
     });
 
