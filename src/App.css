@@ -12,6 +12,7 @@ body {
     text-align: center;
     width: 80%;
     width: 500px;
+    height: 800px;
     padding: 20px;
     background-color: #fff;
     border: 1px solid #ddd;
@@ -35,7 +36,7 @@ body {
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
-    font-size: 14px;
+    font-size: 15px;
     font-family: Arial, sans-serif;
     resize: none;
     margin: 0 auto;
@@ -44,6 +45,7 @@ body {
 
 .user-prompt-form-button {
     display: inline-block;
+    margin-top: 10px;
     padding: 10px 20px;
     font-size: 16px;
     color: #fff;
@@ -66,7 +68,7 @@ body {
     background-color: #f8f9fa;
     text-align: left;
     white-space: pre-wrap;
-    font-size: 14px;
+    font-size: 15px;
     color: #333;
 }
 
@@ -109,6 +111,7 @@ body {
 
 .contact-form-button {
     display: inline-block;
+    margin-top: 10px;
     padding: 10px 20px;
     font-size: 16px;
     color: #fff;

@@ -62,7 +62,7 @@ const App = () => {
       <div className="ai-komponentti">
         <h1 className="komponentti-header">Hankeideatyökalu</h1>
         <form className="user-prompt-form" onSubmit={handleSubmit}>
-            <textarea className="user-prompt-form-textarea" placeholder="Kirjoita hankeideasi tähän..." cols="100" rows="10" type="text"/>
+            <textarea className="user-prompt-form-textarea" placeholder="Kirjoita hankeideasi tähän..." cols="100" rows="10" type="text" maxlength="544" required/>
           <input className="user-prompt-form-button" type="submit" value="Sparraa"/>
         </form>
         {supabaseResponseState}
@@ -76,14 +76,14 @@ const App = () => {
         }}
         >
           <div className="contact-form-inputs">
-            <input name="contact-form-name" placeholder="Nimi"></input>
-            <input name="contact-form-sender" placeholder="Sähköpostiosoite"></input>
-            <input name="contact-form-subject" placeholder="Hankeidea"></input>
+            <input name="contact-form-name" placeholder="Nimi" required></input>
+            <input name="contact-form-sender" placeholder="Sähköpostiosoite" type="email" required></input>
+            <input name="contact-form-subject" placeholder="Hankeidea" required></input>
             <select name="contact-form-recipient" className="contact-form-select">
               <option value="miikka@testi.fi">miikka@testi.fi</option>
             </select>
           </div>
-          <textarea name="contact-form-message" className="contact-form-textarea" placeholder="Viesti" cols="100" rows="10" type="text"/>
+          <textarea name="contact-form-message" placeholder="Viesti" className="contact-form-textarea" type="text" cols="100" rows="10" required/>
           <input className="contact-form-button" type="submit" value="Lähetä"/>
         </form>
       </div>
