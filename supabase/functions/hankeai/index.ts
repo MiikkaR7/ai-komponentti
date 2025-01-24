@@ -1,11 +1,30 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import * as postgres from 'https://deno.land/x/postgres@v0.17.0/mod.ts';
 import OpenAI from 'https://deno.land/x/openai@v4.24.0/mod.ts'
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(100, "86400 s"),
+  analytics: true,
+  /**
+   * Optional prefix for the keys used in redis. This is useful if you want to share a redis
+   * instance with other applications and want to avoid key collisions. The default prefix is
+   * "@upstash/ratelimit"
+   */
+  prefix: "@upstash/ratelimit",
+});
+
+// Use a constant string to limit all requests with a single ratelimit
+// Or use a userID, apiKey or ip address for individual limits.
+const identifier = "api";
+const { success } = await ratelimit.limit(identifier);
 
 
 
