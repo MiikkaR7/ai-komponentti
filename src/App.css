@@ -12,7 +12,6 @@ body {
     text-align: center;
     width: 80%;
     width: 500px;
-    height: 800px;
     padding: 20px;
     background-color: #fff;
     border: 1px solid #ddd;
@@ -78,8 +77,16 @@ body {
     color: #333;
 }
 
+.contact-form-header-hidden {
+    visibility: hidden;
+}
+
 .contact-form {
     margin-bottom: 20px;
+}
+
+.contact-form-hidden {
+    visibility: hidden;
 }
 
 .contact-form-inputs {
