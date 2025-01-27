@@ -148,7 +148,7 @@ body {
     margin-top: 10px;
     padding: 10px 20px;
     font-size: 16px;
-    color: #000000;
+    color: #ffffff;
     background-color: #ec0000;
     border: none;
     border-radius: 5px;
@@ -157,6 +157,10 @@ body {
 
 .contact-form-button:hover {
     background-color: #0056b3;
+}
+
+.contact-form-button-reverse:hover {
+    background-color: #c00101;
 }
 
 .loading-spinner {
@@ -183,18 +187,29 @@ body {
     margin-top: 10px;
     padding: 10px;
     width: 500px;
-    height: 150px;
-    border: 1px solid #ccc;
+    border: 1px solid #000000;
     border-radius: 5px;
-    background-color: #f8f9fa;
+    box-shadow: #000000 5;
+    background-color: #ffffff;
     z-index: 1;
     box-sizing: border-box;
-    font-size: 14px;
     font-family: Arial, sans-serif;
+    text-align: center;
+}
+
+.user-continue-prompt-header {
+    font-size: 32px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.user-continue-prompt-message {
+    font-size: 18px;
 }
 
 .user-continue-prompt-buttons {
     display: flex;
     justify-self: center;
+    padding: 20px;
     gap: 5px;
 }

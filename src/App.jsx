@@ -6,16 +6,16 @@ const App = () => {
 
   const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
-  const [contactFormVisibilityState, setContactFormVisibilityState] =useState(true);
-  const [supabaseResponseState, setSupabaseResponseState] = useState(
-  <div className="ai-response"></div>
-  );
+  const [contactFormVisibilityState, setContactFormVisibilityState] = useState(true);
+  const [supabaseResponseState, setSupabaseResponseState] = useState(<div className="ai-response"></div>);
+  const [supabasePromptButtonState, setSupabasePromptButtonState] = useState(<input className="user-prompt-form-button" type="submit" value="Sparraa" />);
   const [modalOpenState, setModalOpenState] = useState(false);
   const [userPromptState, setUserPromptState] = useState('');
 
   const handleSubmit = async (event) => {
 
     setContactFormVisibilityState(false);
+    setSupabasePromptButtonState(<></>);
     setSupabaseResponseState(<div className="loading-spinner"></div>);
 
     try {
@@ -31,6 +31,7 @@ const App = () => {
         ))}</div>
         );
 
+      setSupabasePromptButtonState(<input className="user-prompt-form-button" type="submit" value="Sparraa" />)
       setContactFormVisibilityState(true);
 
     } catch (error) {
@@ -92,51 +93,67 @@ const App = () => {
     setUserPromptState(e.target.value)
   }
 
-  if (contactFormVisibilityState) {
-    return (
-      <div className="ai-komponentti"> 
-        <h1 className="komponentti-header">Hankeideatyökalu</h1>
-        <form className="user-prompt-form" onSubmit={handleSubmit}>
-          <textarea
-            value={userPromptState}
-            onChange={handleUserInput}
-            name="user-prompt"
-            className="user-prompt-form-textarea"
-            placeholder="Kirjoita hankeideasi tähän..."
-            cols="100"
-            rows="10"
-            type="text"
-            maxLength="544"
-            required
-          />
-          <input className="user-prompt-form-button" type="submit" value="Sparraa" />
-        </form>
-        {supabaseResponseState}
-        {modalOpenState ?
+  return (
+    <>
+      {modalOpenState ? (
           <div className="user-continue-prompt">
             <div>
-              <p>Kiitos!</p>
-              <p>Jatka sparraamista samalla idealla?</p>
+              <p className="user-continue-prompt-header">Kiitos!</p>
+              <p className="user-continue-prompt-message">Jatka sparraamista samalla idealla?</p>
             </div>
             <div className="user-continue-prompt-buttons">
-            <button onClick={handleContinue} className="contact-form-button">Jatka samalla</button>
-            <button onClick={handleNewUserInput} className="contact-form-button-reverse">Uusi idea</button>
+              <button onClick={handleContinue} className="contact-form-button">
+                Jatka samalla
+              </button>
+              <button onClick={handleNewUserInput} className="contact-form-button-reverse">
+                Uusi idea
+              </button>
             </div>
           </div>
-          :
-          <> 
-            <h1 className="contact-form-header">Ota yhteyttä</h1>
-            <form
+
+      ) : (
+
+        <div className="ai-komponentti">
+          <h1 className="komponentti-header">Hankeideatyökalu</h1>
+          <form className="user-prompt-form" onSubmit={handleSubmit}>
+            <textarea
+              value={userPromptState}
+              onChange={handleUserInput}
+              name="user-prompt"
+              className="user-prompt-form-textarea"
+              placeholder="Kirjoita hankeideasi tähän..."
+              cols="100"
+              rows="10"
+              type="text"
+              maxLength="544"
+              required
+            />
+            {supabasePromptButtonState}
+          </form>
+          {supabaseResponseState}
+
+        {contactFormVisibilityState ?
+
+          <>
+          <h1 className="contact-form-header">Ota yhteyttä</h1>
+          <form
             className="contact-form"
             onSubmit={async (e) => {
               e.preventDefault();
               const formData = new FormData(e.target);
               await handleContactForm(formData, e.target);
             }}
-            >
+          >
+
+
             <div className="contact-form-inputs">
               <input name="contact-form-name" placeholder="Nimi" required />
-              <input name="contact-form-sender" placeholder="Sähköpostiosoite" type="email" required />
+              <input
+                name="contact-form-sender"
+                placeholder="Sähköpostiosoite"
+                type="email"
+                required
+              />
               <input name="contact-form-subject" placeholder="Hankeidea" required />
               <select name="contact-form-recipient" className="contact-form-select">
                 <option value="miikka@testi.fi">miikka@testi.fi</option>
@@ -152,61 +169,18 @@ const App = () => {
               required
             />
             <input className="contact-form-button" type="submit" value="Lähetä" />
-            </form>
+          </form>
           </>
-          }
-      </div>
-    );
-  } else {
-    return (
-      <>
-      <div className="ai-komponentti">
-        <h1 className="komponentti-header">Hankeideatyökalu</h1>
-        <form className="user-prompt-form" onSubmit={handleSubmit}>
-          <textarea
-            className="user-prompt-form-textarea"
-            placeholder="Kirjoita hankeideasi tähän..."
-            cols="100"
-            rows="10"
-            type="text"
-            maxLength="544"
-            required
-          />
-          <input className="user-prompt-form-button-hidden" type="submit" value="Sparraa" />
-        </form>
-        {supabaseResponseState}
-        <h1 className="contact-form-header-hidden">Ota yhteyttä</h1>
-        <form
-          className="contact-form-hidden"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            await handleContactForm(formData, e.target);
-          }}
-        >
-          <div className="contact-form-inputs">
-            <input name="contact-form-name" placeholder="Nimi" required />
-            <input name="contact-form-sender" placeholder="Sähköpostiosoite" type="email" required />
-            <input name="contact-form-subject" placeholder="Hankeidea" required />
-            <select name="contact-form-recipient" className="contact-form-select">
-              <option value="miikka@testi.fi">miikka@testi.fi</option>
-            </select>
-          </div>
-          <textarea
-            name="contact-form-message"
-            placeholder="Viesti"
-            className="contact-form-textarea"
-            type="text"
-            cols="100"
-            rows="10"
-            required
-          />
-          <input className="contact-form-button" type="submit" value="Lähetä" />
-        </form>
-      </div>
-      </>
-    );
-  }  
+        : 
+        <>
+        </>
+        }
+          
+        </div>
+      )}
+    </>
+  );
+  
 
 }
 
