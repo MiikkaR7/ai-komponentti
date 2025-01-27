@@ -9,6 +9,8 @@ body {
 }
 
 .ai-komponentti {
+    position: relative;
+    z-index: 0;
     text-align: center;
     width: 80%;
     width: 500px;
@@ -141,8 +143,24 @@ body {
     cursor: pointer;
 }
 
+.contact-form-button-reverse {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 10px 20px;
+    font-size: 16px;
+    color: #ffffff;
+    background-color: #ec0000;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
 .contact-form-button:hover {
     background-color: #0056b3;
+}
+
+.contact-form-button-reverse:hover {
+    background-color: #c00101;
 }
 
 .loading-spinner {
@@ -163,3 +181,47 @@ body {
       transform: rotate(360deg);
     }
   }
+
+  @keyframes slideUp {
+    0% {
+        transform: translateY(200%);
+    }
+    100% {
+        transform: translateY(-15vh);
+    }
+}
+
+.user-continue-prompt {
+    bottom: -100px;
+    margin: 0 auto;
+    margin-top: 10px;
+    padding: 10px;
+    width: 500px;
+    border: 1px solid #000000;
+    border-radius: 5px;
+    box-shadow: #000000 5;
+    background-color: #ffffff;
+    z-index: 1;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    animation: slideUp 0.5s ease-out forwards;
+}
+
+.user-continue-prompt-header {
+    font-weight: bold;
+    font-size: 32px;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.user-continue-prompt-message {
+    font-size: 18px;
+}
+
+.user-continue-prompt-buttons {
+    display: flex;
+    justify-self: center;
+    padding: 20px;
+    gap: 5px;
+}

@@ -6,20 +6,22 @@ const App = () => {
 
   const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
-  const [contactFormVisibilityState, setContactFormVisibilityState] =useState(true);
-  const [supabaseResponseState, setSupabaseResponseState] = useState(
-  <div className="ai-response"></div>
-  );
+  const [contactFormVisibilityState, setContactFormVisibilityState] = useState(true);
+  const [supabaseResponseState, setSupabaseResponseState] = useState(<div className="ai-response"></div>);
+  const [supabasePromptButtonState, setSupabasePromptButtonState] = useState(<input className="user-prompt-form-button" type="submit" value="Sparraa" />);
+  const [modalOpenState, setModalOpenState] = useState(false);
+  const [userPromptState, setUserPromptState] = useState('');
 
   const handleSubmit = async (event) => {
 
     setContactFormVisibilityState(false);
+    setSupabasePromptButtonState(<></>);
     setSupabaseResponseState(<div className="loading-spinner"></div>);
 
     try {
 
       event.preventDefault();
-      const { data, error } = await supabase.functions.invoke('hankeai', {
+      const { data } = await supabase.functions.invoke('hankeai', {
         body: { query: event.target[0].value }
       });
 
@@ -29,15 +31,15 @@ const App = () => {
         ))}</div>
         );
 
+      setSupabasePromptButtonState(<input className="user-prompt-form-button" type="submit" value="Sparraa" />)
       setContactFormVisibilityState(true);
 
     } catch (error) {
 
-      console.log(error);
       setContactFormVisibilityState(true);
       setSupabaseResponseState(
         <div className="ai-response-error">
-          <p>Error: rate limit reached, try again later</p>
+          <p>Error: {error.message}</p>
         </div>
       );
 
@@ -48,10 +50,12 @@ const App = () => {
 
     //TODO: implement verified sender address and real recipients
 
-    const hankeaihe = formData.get("contact-form-subject");
-    const sposti = formData.get("contact-form-sender");
-    const edustaja = formData.get("contact-form-recipient");
-    const viesti = formData.get("contact-form-message");
+    setModalOpenState(!modalOpenState);
+
+    const hankeaihe = formData.get('contact-form-subject');
+    const sposti = formData.get('contact-form-sender');
+    const edustaja = formData.get('contact-form-recipient');
+    const viesti = formData.get('contact-form-message');
 
       formElement.reset();
 
@@ -75,73 +79,108 @@ const App = () => {
 
   }
 
-  if (contactFormVisibilityState) {
+  const handleContinue = () => {
+    setModalOpenState(false);
+  }
 
-    return (
-    <div className="ai-komponentti">
-        <h1 className="komponentti-header">Hankeideatyökalu</h1>
-        <form className="user-prompt-form" onSubmit={handleSubmit}>
-            <textarea className="user-prompt-form-textarea" placeholder="Kirjoita hankeideasi tähän..." cols="100" rows="10" type="text" maxlength="544" required/>
-          <input className="user-prompt-form-button" type="submit" value="Sparraa"/>
-        </form>
-        {supabaseResponseState}
-        <h1 className="contact-form-header">Ota yhteyttä</h1>
-        <form
-        className="contact-form"
-        onSubmit={async (e) => {
-          e.preventDefault();
-          const formData = new FormData(e.target);
-          await handleContactForm(formData, e.target);
-        }}
-        >
-          <div className="contact-form-inputs">
-            <input name="contact-form-name" placeholder="Nimi" required></input>
-            <input name="contact-form-sender" placeholder="Sähköpostiosoite" type="email" required></input>
-            <input name="contact-form-subject" placeholder="Hankeidea" required></input>
-            <select name="contact-form-recipient" className="contact-form-select">
-              <option value="miikka@testi.fi">miikka@testi.fi</option>
-            </select>
+  const handleNewUserInput = () => {
+    setUserPromptState('');
+    setSupabaseResponseState(<div className="ai-response"></div>);
+    setModalOpenState(false);
+  }
+
+  const handleUserInput = (e) => {
+    setUserPromptState(e.target.value)
+  }
+
+  return (
+    <>
+      {modalOpenState ? (
+          <div className="user-continue-prompt">
+            <div>
+              <p className="user-continue-prompt-header">Kiitti!</p>
+              <p className="user-continue-prompt-message">Jatka sparraamista samalla idealla?</p>
+            </div>
+            <div className="user-continue-prompt-buttons">
+              <button onClick={handleContinue} className="contact-form-button">
+                Jatka samalla
+              </button>
+              <button onClick={handleNewUserInput} className="contact-form-button-reverse">
+                Uusi idea
+              </button>
+            </div>
           </div>
-          <textarea name="contact-form-message" placeholder="Viesti" className="contact-form-textarea" type="text" cols="100" rows="10" required/>
-          <input className="contact-form-button" type="submit" value="Lähetä"/>
-        </form>
-      </div>
-    );
 
-  } else {
+      ) : (
 
-    return (
-      <div className="ai-komponentti">
+        <div className="ai-komponentti">
           <h1 className="komponentti-header">Hankeideatyökalu</h1>
           <form className="user-prompt-form" onSubmit={handleSubmit}>
-              <textarea className="user-prompt-form-textarea" placeholder="Kirjoita hankeideasi tähän..." cols="100" rows="10" type="text" maxlength="544" required/>
-            <input className="user-prompt-form-button-hidden" type="submit" value="Sparraa"/>
+            <textarea
+              value={userPromptState}
+              onChange={handleUserInput}
+              name="user-prompt"
+              className="user-prompt-form-textarea"
+              placeholder="Kirjoita hankeideasi tähän..."
+              cols="100"
+              rows="10"
+              type="text"
+              maxLength="544"
+              required
+            />
+            {supabasePromptButtonState}
           </form>
           {supabaseResponseState}
-          <h1 className="contact-form-header-hidden">Ota yhteyttä</h1>
+
+        {contactFormVisibilityState ?
+
+          <>
+          <h1 className="contact-form-header">Ota yhteyttä</h1>
           <form
-          className="contact-form-hidden"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            const formData = new FormData(e.target);
-            await handleContactForm(formData, e.target);
-          }}
+            className="contact-form"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              const formData = new FormData(e.target);
+              await handleContactForm(formData, e.target);
+            }}
           >
+
+
             <div className="contact-form-inputs">
-              <input name="contact-form-name" placeholder="Nimi" required></input>
-              <input name="contact-form-sender" placeholder="Sähköpostiosoite" type="email" required></input>
-              <input name="contact-form-subject" placeholder="Hankeidea" required></input>
+              <input name="contact-form-name" placeholder="Nimi" required />
+              <input
+                name="contact-form-sender"
+                placeholder="Sähköpostiosoite"
+                type="email"
+                required
+              />
+              <input name="contact-form-subject" placeholder="Hankeidea" required />
               <select name="contact-form-recipient" className="contact-form-select">
                 <option value="miikka@testi.fi">miikka@testi.fi</option>
               </select>
             </div>
-            <textarea name="contact-form-message" placeholder="Viesti" className="contact-form-textarea" type="text" cols="100" rows="10" required/>
-            <input className="contact-form-button" type="submit" value="Lähetä"/>
+            <textarea
+              name="contact-form-message"
+              placeholder="Viesti"
+              className="contact-form-textarea"
+              type="text"
+              cols="100"
+              rows="10"
+              required
+            />
+            <input className="contact-form-button" type="submit" value="Lähetä" />
           </form>
+          </>
+        : 
+        <>
+        </>
+        }
+          
         </div>
-      );
-
-  }
+      )}
+    </>
+  );
+  
 
 }
 
