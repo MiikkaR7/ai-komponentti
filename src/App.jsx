@@ -98,7 +98,7 @@ const App = () => {
       {modalOpenState ? (
           <div className="user-continue-prompt">
             <div>
-              <p className="user-continue-prompt-header">Kiitos!</p>
+              <p className="user-continue-prompt-header">Kiitti!</p>
               <p className="user-continue-prompt-message">Jatka sparraamista samalla idealla?</p>
             </div>
             <div className="user-continue-prompt-buttons">
