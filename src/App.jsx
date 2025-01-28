@@ -147,15 +147,25 @@ const App = () => {
 
 
             <div className="contact-form-inputs">
-              <input name="contact-form-name" placeholder="Nimi" required />
+              <input 
+                name="contact-form-name"
+                className="contact-form-inputs-input"
+                placeholder="Nimi" 
+                required/>
               <input
                 name="contact-form-sender"
+                className="contact-form-inputs-input"
                 placeholder="Sähköpostiosoite"
                 type="email"
-                required
-              />
-              <input name="contact-form-subject" placeholder="Hankeidea" required />
-              <select name="contact-form-recipient" className="contact-form-select">
+                required/>
+              <input 
+                name="contact-form-subject"
+                className="contact-form-inputs-input"
+                placeholder="Hankeidea" 
+                required/>
+              <select 
+                name="contact-form-recipient" 
+                className="contact-form-select">
                 <option value="miikka@testi.fi">miikka@testi.fi</option>
               </select>
             </div>
