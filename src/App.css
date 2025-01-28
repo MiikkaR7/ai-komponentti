@@ -105,8 +105,14 @@ body {
     width: 400px;
 }
 
+.contact-form-inputs-input {
+    width: 152px;
+    height: 14px;
+}
+
 .contact-form-select {
-    width: 177px;
+    width: 160px;
+    height: 20px;
 }
 
 .contact-form-textarea {
