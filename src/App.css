@@ -27,6 +27,7 @@ body {
 }
 
 .user-prompt-form {
+    display: grid;
     margin-bottom: 20px;
 }
 
@@ -45,7 +46,9 @@ body {
 
 
 .user-prompt-form-button {
-    display: inline-block;
+    justify-self: center;
+    width: 95px;
+    height: 40px;
     margin-top: 10px;
     padding: 10px 20px;
     font-size: 16px;
@@ -54,10 +57,6 @@ body {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-}
-
-.user-prompt-form-button-hidden {
-    visibility: hidden;
 }
 
 .user-prompt-form-button:hover {
@@ -92,23 +91,16 @@ body {
     color: #333;
 }
 
-.contact-form-header-hidden {
-    visibility: hidden;
-}
-
 .contact-form {
+    display: grid;
     margin-bottom: 20px;
 }
 
-.contact-form-hidden {
-    visibility: hidden;
-}
-
 .contact-form-inputs {
-    justify-self: center;
-    justify-content: center;
     display: flex;
     flex-wrap: wrap;
+    justify-self: center;
+    justify-content: center;
     gap: 5px;
     width: 400px;
 }
@@ -132,7 +124,9 @@ body {
 }
 
 .contact-form-button {
-    display: inline-block;
+    justify-self: center;
+    width: 95px;
+    height: 40px;
     margin-top: 10px;
     padding: 10px 20px;
     font-size: 16px;
@@ -192,6 +186,7 @@ body {
 }
 
 .user-continue-prompt {
+    display: grid;
     bottom: -100px;
     margin: 0 auto;
     margin-top: 10px;
@@ -223,5 +218,41 @@ body {
     display: flex;
     justify-self: center;
     padding: 20px;
-    gap: 5px;
+    gap: 10px;
+}
+
+.prompt-form-button {
+    display: inline-block;
+    width: 150px;
+    height: 60px;
+    margin-top: 10px;
+    padding: 10px 20px;
+    font-size: 18px;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.prompt-form-button-reverse {
+    display: inline-block;
+    width: 150px;
+    height: 60px;
+    margin-top: 10px;
+    padding: 10px 20px;
+    font-size: 18px;
+    color: #ffffff;
+    background-color: #ec0000;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.prompt-form-button:hover {
+    background-color: #0056b3;
+}
+
+.prompt-form-button-reverse:hover {
+    background-color: #c00101;
 }

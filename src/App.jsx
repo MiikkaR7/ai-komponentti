@@ -102,10 +102,10 @@ const App = () => {
               <p className="user-continue-prompt-message">Jatka sparraamista samalla idealla?</p>
             </div>
             <div className="user-continue-prompt-buttons">
-              <button onClick={handleContinue} className="contact-form-button">
+              <button onClick={handleContinue} className="prompt-form-button">
                 Jatka samalla
               </button>
-              <button onClick={handleNewUserInput} className="contact-form-button-reverse">
+              <button onClick={handleNewUserInput} className="prompt-form-button-reverse">
                 Uusi idea
               </button>
             </div>
