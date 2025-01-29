@@ -85,7 +85,7 @@ const App = () => {
 
   const handleNewUserInput = () => {
     setUserPromptState('');
-    setSupabaseResponseState(<div className="ai-response"></div>);
+    setSupabaseResponseState(<></>);
     setModalOpenState(false);
   }
 
