@@ -22,20 +22,20 @@
 .user-prompt-form {
     display: grid;
     justify-self: center;
-    width: 540px;
     margin-bottom: 20px;
 }
 
 .user-prompt-form-textarea {
-    font-family: 'Manrope', sans-serif;
     width: 450px;
-    margin: 0 auto;
-    box-sizing: border-box;
     height: 130px;
+    margin: 0 auto;
     padding: 10px;
+    box-sizing: border-box;
     border: 1px solid #ccc;
     border-radius: 5px;
+    outline: none;
     font-size: 14px;
+    font-family: 'Manrope', sans-serif;
     resize: none;
 }
 
