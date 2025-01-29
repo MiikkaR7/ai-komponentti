@@ -7,7 +7,7 @@ const App = () => {
   const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
   const [contactFormVisibilityState, setContactFormVisibilityState] = useState(true);
-  const [supabaseResponseState, setSupabaseResponseState] = useState(<div className="ai-response"></div>);
+  const [supabaseResponseState, setSupabaseResponseState] = useState(<></>);
   const [supabasePromptButtonState, setSupabasePromptButtonState] = useState(<input className="user-prompt-form-button" type="submit" value="Sparraa" />);
   const [modalOpenState, setModalOpenState] = useState(false);
   const [userPromptState, setUserPromptState] = useState('');
