@@ -13,38 +13,42 @@ const App = () => {
   const [userPromptState, setUserPromptState] = useState('');
 
   const handleSubmit = async (event) => {
-
-    setContactFormVisibilityState(false);
-    setSupabasePromptButtonState(<></>);
+    event.preventDefault();
     setSupabaseResponseState(<div className="loading-spinner"></div>);
-
+  
     try {
-
-      event.preventDefault();
-      const { data } = await supabase.functions.invoke('hankeai', {
-        body: { query: event.target[0].value }
+      const response = await fetch(process.env.SUPABASE_URL + "/functions/v1/hankeai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + process.env.SUPABASE_ANON_KEY },
+        body: JSON.stringify({ query: userPromptState }),
       });
-
-      setSupabaseResponseState(
-        <div className="ai-response">{data.reply.split('\n').map((line, index) => (
-          <p key={index}>{line}</p>
-        ))}</div>
+  
+      if (!response.body) throw new Error("No response body");
+  
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedText = "";
+  
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+  
+        const chunk = decoder.decode(value, { stream: true });
+        accumulatedText += chunk;
+  
+        setSupabaseResponseState(
+          <div className="ai-response">{accumulatedText}</div>
         );
-
-      setSupabasePromptButtonState(<input className="user-prompt-form-button" type="submit" value="Sparraa" />)
-      setContactFormVisibilityState(true);
-
+      }
     } catch (error) {
-
-      setContactFormVisibilityState(true);
       setSupabaseResponseState(
         <div className="ai-response-error">
           <p>Error: {error.message}</p>
         </div>
       );
-
     }
-  }
+  };
+  
 
   const handleContactForm = async (formData, formElement) => {
 
