@@ -68,7 +68,7 @@ Deno.serve(async (req) => {
 
     //Tekoälylle tehtävä pyyntö, jossa määritetään vastaajan rooli
 
-    const chatCompletion = await openai.chat.completions.create({
+    const chatCompletionStream = await openai.chat.completions.create({
       messages: [
         {
           role: 'system', 
@@ -90,18 +90,29 @@ Deno.serve(async (req) => {
         }
       ],
       model: 'gpt-4o',
-      stream: false,
+      stream: true,
     });
 
-    reply = chatCompletion.choices[0].message.content;
+    const encoder = new TextEncoder();
+    const readableStream = new ReadableStream({
+      async start(controller) {
+        for await (const chunk of chatCompletionStream) {
+          controller.enqueue(encoder.encode(chunk.choices[0]?.delta?.content || ""));
+        }
+        controller.close();
+      }
+    })
+
+    return new Response(readableStream, {
+      status: 200,
+      headers: { 'Content-Type': 'text/plain', ...corsHeaders },
+    })
+
+    //reply = chatCompletionStream.choices[0].message.content;
 
   } catch (error) {
     console.log(error);
     return new Response(JSON.stringify({error: error.message}), {status: 500});
   }
 
-  return new Response(JSON.stringify({ reply }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json', ...corsHeaders },
-  })
 });
