@@ -8,6 +8,7 @@ const App = () => {
 
   const [contactFormVisibilityState, setContactFormVisibilityState] = useState(true);
   const [supabaseResponseState, setSupabaseResponseState] = useState(<></>);
+  const [supabaseExpertResponseState, setSupabaseExpertResponseState] = useState(<div className="ai-response">Expert Response:</div>);
   const [supabasePromptButtonState, setSupabasePromptButtonState] = useState(<input className="user-prompt-form-button" type="submit" value="Sparraa" />);
   const [modalOpenState, setModalOpenState] = useState(false);
   const [userPromptState, setUserPromptState] = useState('');
@@ -17,6 +18,17 @@ const App = () => {
     setSupabaseResponseState(<div className="loading-spinner"></div>);
   
     try {
+
+      const { data } = await supabase.functions.invoke('hankeai-expert',{
+        body: JSON.stringify({query: userPromptState})
+      });
+
+      setSupabaseExpertResponseState(
+        <div className="ai-response">{data.reply.split('\n').map((line, index) => (
+          <p key={index}>{line}</p>
+        ))}</div>
+      );
+
       const response = await fetch(process.env.SUPABASE_URL + "/functions/v1/hankeai", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": "Bearer " + process.env.SUPABASE_ANON_KEY },
@@ -135,6 +147,7 @@ const App = () => {
             {supabasePromptButtonState}
           </form>
           {supabaseResponseState}
+          {supabaseExpertResponseState}
 
         {contactFormVisibilityState ?
 

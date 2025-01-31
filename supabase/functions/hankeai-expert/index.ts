@@ -36,8 +36,6 @@ Deno.serve(async (req) => {
     apiKey: apiKey,
   });
 
-  let reply;
-
   try {
 
     //Rate limit
@@ -60,35 +58,30 @@ Deno.serve(async (req) => {
       throw new Error('Limit exceeded');
     }
 
-    // Tietokannasta haetaan kontekstia, rahoituslähteet ja yhteystiedot.
+    // Tietokannasta haetaan kontekstia ja rahoituslähteet.
 
     const fetchContextFromDb = await connection.queryObject('SELECT (name, description) FROM generalinfo');
     const fetchFundingFromDb = await connection.queryObject('SELECT (name, description) FROM funding');
-    const fetchContactsFromDb = await connection.queryObject('SELECT (etunimi, sahkopostiosoite, avainsanat) FROM contacts');
 
     const context = fetchContextFromDb.rows;
     const funding = fetchFundingFromDb.rows;
-    const contacts = fetchContactsFromDb.rows;
 
     const contextString = JSON.stringify(context);
     const fundingString = JSON.stringify(funding);
-    const contactsString = JSON.stringify(contacts);
 
     //Tekoälylle tehtävä pyyntö, jossa määritetään vastaajan rooli
 
-    const chatCompletionStream = await openai.chat.completions.create({
+    let reply;
+
+    const ExpertResponse = await openai.chat.completions.create({
       messages: [
         {
           role: 'system', 
-          content: `Rajoita vastauksesi noin 1200 merkkiin. Olet avulias avustaja. Älä käytä vastauksessasi erikoismerkkejä. Vastauksen alussa tervehdi yrittäjää ystävällisesti. 
-                    Tehtäväsi on auttaa yrittäjiä kehittämään heidän hankeideoitaan Pohjois-Suomen eli Lapin alueella. 
-                    Anna yrittäjälle suosituksia ja parannusehdotuksia hänen ideaansa. Pohdi, millainen toteutustapa tai lähestymistapa soveltuisi yrittäjän ehdotukselle. 
+          content: `Rajoita vastauksesi noin 1200 merkkiin. Olet avulias avustaja. Tehtäväsi on auttaa Lapin AMK:n hankevalmistelijoita.
+                    Anna hankevalmistelijalle näkökulmia ja toteutustapoja vastaanotettuun ideaan. Pohdi, millainen toteutustapa tai lähestymistapa soveltuisi yrittäjän ehdotukselle.
+                    Pohdi erityisesti, miten hanke voitaisiin toteuttaa osana AMK:n hanketoimintaa, ja mitä AMK:n resursseja voidaan käyttää. 
                     Käytä tätä taulukkoa kontekstina: ${contextString}.
-                    Sisällytä vastaukseen aina yrittäjän hankeideaan soveltuvia rahoituslähteitä. Rahoituslähteet ovat tässä taulussa: ${fundingString}.
-                    Ehdotusten lopuksi anna 3 hyvin lyhyttä esimerkkiaihetta hankkeelle.
-                    Valitse sopivat edustajat vertaamalla yrittäjän antamaa hankeideaa edustajien avainsanat-sarakkeeseen.
-                    Kutsu yrittäjä vastauksesi lopussa ottamaan yhteyttä sähköpostin kautta niihin edustajiin, joiden kuvaus ja avainsanat liittyvät yrittäjän antamaan hankeideaan.
-                    AMK-edustajien yhteystiedot ja kuvaus ovat tässä tietokannan taulussa: ${contactsString}.`
+                    Ehdota hankevalmistelijalle myös rahoituslähteitä hankeidealle. Rahoituslähteet ovat tässä taulukossa: ${fundingString}.`
         },
         {
           role: 'user', 
@@ -96,25 +89,15 @@ Deno.serve(async (req) => {
         }
       ],
       model: 'gpt-4o',
-      stream: true,
+      stream: false,
     });
 
-    const encoder = new TextEncoder();
-    const readableStream = new ReadableStream({
-      async start(controller) {
-        for await (const chunk of chatCompletionStream) {
-          controller.enqueue(encoder.encode(chunk.choices[0]?.delta?.content || ""));
-        }
-        controller.close();
-      }
-    })
+    reply = ExpertResponse.choices[0].message.content;
 
-    return new Response(readableStream, {
+    return new Response(JSON.stringify({ reply }), {
       status: 200,
-      headers: { 'Content-Type': 'text/plain', ...corsHeaders },
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
     })
-
-    //reply = chatCompletionStream.choices[0].message.content;
 
   } catch (error) {
     console.log(error);
