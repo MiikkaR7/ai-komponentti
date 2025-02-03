@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
 
     // Tietokannasta haetaan kontekstia ja rahoituslähteet.
 
-    const fetchContextFromDb = await connection.queryObject('SELECT (name, description) FROM generalinfo');
+    const fetchContextFromDb = await connection.queryObject(`SELECT (name, description, metainfo) FROM generalinfo WHERE (metainfo LIKE '%amk%')`);
     const fetchFundingFromDb = await connection.queryObject('SELECT (name, description) FROM funding');
 
     const context = fetchContextFromDb.rows;
@@ -77,11 +77,12 @@ Deno.serve(async (req) => {
       messages: [
         {
           role: 'system', 
-          content: `Rajoita vastauksesi noin 1200 merkkiin. Olet avulias avustaja. Tehtäväsi on auttaa Lapin AMK:n hankevalmistelijoita.
-                    Anna hankevalmistelijalle näkökulmia ja toteutustapoja vastaanotettuun ideaan. Pohdi, millainen toteutustapa tai lähestymistapa soveltuisi yrittäjän ehdotukselle.
-                    Pohdi erityisesti, miten hanke voitaisiin toteuttaa osana AMK:n hanketoimintaa, ja mitä AMK:n resursseja voidaan käyttää. 
-                    Käytä tätä taulukkoa kontekstina: ${contextString}.
-                    Ehdota hankevalmistelijalle myös rahoituslähteitä hankeidealle. Rahoituslähteet ovat tässä taulukossa: ${fundingString}.`
+          content: `Olet avustaja, jonka tehtävä on auttaa Lapin AMK:n hankevalmistelijoita, kontekstia: ${contextString}. Noudata alla olevia ohjeita:
+                    1. Rajoita vastauksesi noin 1200 merkkiin.
+                    2. Tee johtopäätös siitä, soveltuuko idea paremmin opiskelijayhteistyöksi vai hankkeeksi käyttämällä kontekstia.
+                    3. Jos idea soveltuu hankkeeksi, päätä onko hanke tutkimus- vai aluekehityspainotteinen.
+                    4. Anna hankevalmistelijalle näkökulmia ja toteutustapoja vastaanotettuun ideaan.
+                    6. Ehdota hankevalmistelijalle myös rahoituslähteitä hankeidealle, rahoituslähteet ovat tässä taulukossa: ${fundingString}.`
         },
         {
           role: 'user', 
@@ -90,6 +91,7 @@ Deno.serve(async (req) => {
       ],
       model: 'gpt-4o',
       stream: false,
+      temperature: 0
     });
 
     reply = ExpertResponse.choices[0].message.content;

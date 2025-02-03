@@ -8,7 +8,7 @@ const App = () => {
 
   const [contactFormVisibilityState, setContactFormVisibilityState] = useState(true);
   const [supabaseResponseState, setSupabaseResponseState] = useState(<></>);
-  const [supabaseExpertResponseState, setSupabaseExpertResponseState] = useState(<div className="ai-response">Expert Response:</div>);
+  const [supabaseExpertResponseState, setSupabaseExpertResponseState] = useState(<></>);
   const [supabasePromptButtonState, setSupabasePromptButtonState] = useState(<input className="user-prompt-form-button" type="submit" value="Sparraa" />);
   const [modalOpenState, setModalOpenState] = useState(false);
   const [userPromptState, setUserPromptState] = useState('');
@@ -23,10 +23,17 @@ const App = () => {
         body: JSON.stringify({query: userPromptState})
       });
 
+      let parsedReply;
+
+      parsedReply = data.reply.replaceAll('*', '');
+
       setSupabaseExpertResponseState(
-        <div className="ai-response">{data.reply.split('\n').map((line, index) => (
+        <>
+        <p>Expert response:</p>
+        <div className="ai-response">{parsedReply.split('\n').map((line, index) => (
           <p key={index}>{line}</p>
         ))}</div>
+        </>
       );
 
       const response = await fetch(process.env.SUPABASE_URL + "/functions/v1/hankeai", {

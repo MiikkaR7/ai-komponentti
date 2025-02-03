@@ -62,9 +62,9 @@ Deno.serve(async (req) => {
 
     // Tietokannasta haetaan kontekstia, rahoituslähteet ja yhteystiedot.
 
-    const fetchContextFromDb = await connection.queryObject('SELECT (name, description) FROM generalinfo');
+    const fetchContextFromDb = await connection.queryObject(`SELECT name, description, metainfo FROM generalinfo WHERE (metainfo LIKE '%yrittaja%')`);
     const fetchFundingFromDb = await connection.queryObject('SELECT (name, description) FROM funding');
-    const fetchContactsFromDb = await connection.queryObject('SELECT (etunimi, sahkopostiosoite, avainsanat) FROM contacts');
+    const fetchContactsFromDb = await connection.queryObject('SELECT (etunimi, sahkopostiosoite) FROM contacts');
 
     const context = fetchContextFromDb.rows;
     const funding = fetchFundingFromDb.rows;
@@ -80,15 +80,13 @@ Deno.serve(async (req) => {
       messages: [
         {
           role: 'system', 
-          content: `Rajoita vastauksesi noin 1200 merkkiin. Olet avulias avustaja. Älä käytä vastauksessasi erikoismerkkejä. Vastauksen alussa tervehdi yrittäjää ystävällisesti. 
-                    Tehtäväsi on auttaa yrittäjiä kehittämään heidän hankeideoitaan Pohjois-Suomen eli Lapin alueella. 
-                    Anna yrittäjälle suosituksia ja parannusehdotuksia hänen ideaansa. Pohdi, millainen toteutustapa tai lähestymistapa soveltuisi yrittäjän ehdotukselle. 
-                    Käytä tätä taulukkoa kontekstina: ${contextString}.
-                    Sisällytä vastaukseen aina yrittäjän hankeideaan soveltuvia rahoituslähteitä. Rahoituslähteet ovat tässä taulussa: ${fundingString}.
-                    Ehdotusten lopuksi anna 3 hyvin lyhyttä esimerkkiaihetta hankkeelle.
-                    Valitse sopivat edustajat vertaamalla yrittäjän antamaa hankeideaa edustajien avainsanat-sarakkeeseen.
-                    Kutsu yrittäjä vastauksesi lopussa ottamaan yhteyttä sähköpostin kautta niihin edustajiin, joiden kuvaus ja avainsanat liittyvät yrittäjän antamaan hankeideaan.
-                    AMK-edustajien yhteystiedot ja kuvaus ovat tässä tietokannan taulussa: ${contactsString}.`
+          content: `Olet avulias avustaja, jonka tehtävä on auttaa yrittäjiä kehittämään heidän hankeideoitaan Pohjois-Suomessa. Noudata alla olevia ohjeita:
+                    1. Rajoita vastauksesi noin 1200 merkkiin.
+                    2. Vastauksesi alussa tervehdi yrittäjää.
+                    3. Anna yrittäjälle suosituksia ja parannusehdotuksia hänen ideaansa, käytä tätä taulua kontekstina: ${contextString}.
+                    4. Sisällytä vastaukseen aina yrittäjän hankeideaan soveltuvia rahoituslähteitä, rahoituslähteet ovat tässä taulussa: ${fundingString}.
+                    5. Ehdotusten lopuksi anna 3 hyvin lyhyttä esimerkkiaihetta hankkeelle.
+                    6. Vastauksen lopussa kutsu yrittäjä ottamaan yhteyttä ideaan sopiviin edustajiin taulusta ${contactsString}, anna heidän sähköpostiosoitteet ja nimet.`                   
         },
         {
           role: 'user', 
@@ -97,6 +95,7 @@ Deno.serve(async (req) => {
       ],
       model: 'gpt-4o',
       stream: true,
+      temperature: 0.1
     });
 
     const encoder = new TextEncoder();
