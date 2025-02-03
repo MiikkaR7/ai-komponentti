@@ -36,8 +36,6 @@ Deno.serve(async (req) => {
     apiKey: apiKey,
   });
 
-  let reply;
-
   try {
 
     //Rate limit
@@ -60,33 +58,31 @@ Deno.serve(async (req) => {
       throw new Error('Limit exceeded');
     }
 
-    // Tietokannasta haetaan kontekstia, rahoituslähteet ja yhteystiedot.
+    // Tietokannasta haetaan kontekstia ja rahoituslähteet.
 
-    const fetchContextFromDb = await connection.queryObject(`SELECT name, description, metainfo FROM generalinfo WHERE (metainfo LIKE '%yrittaja%')`);
+    const fetchContextFromDb = await connection.queryObject(`SELECT (name, description, metainfo) FROM generalinfo WHERE (metainfo LIKE '%amk%')`);
     const fetchFundingFromDb = await connection.queryObject('SELECT (name, description) FROM funding');
-    const fetchContactsFromDb = await connection.queryObject('SELECT (etunimi, sahkopostiosoite) FROM contacts');
 
     const context = fetchContextFromDb.rows;
     const funding = fetchFundingFromDb.rows;
-    const contacts = fetchContactsFromDb.rows;
 
     const contextString = JSON.stringify(context);
     const fundingString = JSON.stringify(funding);
-    const contactsString = JSON.stringify(contacts);
 
     //Tekoälylle tehtävä pyyntö, jossa määritetään vastaajan rooli
 
-    const chatCompletionStream = await openai.chat.completions.create({
+    let reply;
+
+    const ExpertResponse = await openai.chat.completions.create({
       messages: [
         {
           role: 'system', 
-          content: `Olet avulias avustaja, jonka tehtävä on auttaa yrittäjiä kehittämään heidän hankeideoitaan Pohjois-Suomessa. Noudata alla olevia ohjeita:
-                    1. Älä käytä Markdown-muotoilua listassa, eli *-merkkiä.
-                    2. Vastauksesi alussa tervehdi yrittäjää.
-                    3. Anna yrittäjälle useita suosituksia ja parannusehdotuksia hänen ideansa toteuttamiseen, käytä tätä taulua kontekstina: ${contextString}.
-                    4. Sisällytä vastaukseen aina yrittäjän hankeideaan soveltuvia rahoituslähteitä, rahoituslähteet ovat tässä taulussa: ${fundingString}.
-                    5. Ehdotusten lopuksi anna 3 hyvin lyhyttä esimerkkiaihetta hankkeelle.
-                    6. Vastauksen lopussa kutsu yrittäjä ottamaan yhteyttä ideaan sopiviin edustajiin taulusta ${contactsString}, anna heidän sähköpostiosoitteet ja nimet.`                   
+          content: `Olet avustaja, jonka tehtävä on auttaa Lapin AMK:n hankevalmistelijoita, kontekstia: ${contextString}. Noudata alla olevia ohjeita:
+                    1. Rajoita vastauksesi noin 1200 merkkiin.
+                    2. Tee johtopäätös siitä, soveltuuko idea paremmin opiskelijayhteistyöksi vai hankkeeksi käyttämällä kontekstia.
+                    3. Jos idea soveltuu hankkeeksi, päätä onko hanke tutkimus- vai aluekehityspainotteinen.
+                    4. Anna hankevalmistelijalle näkökulmia ja toteutustapoja vastaanotettuun ideaan.
+                    6. Ehdota hankevalmistelijalle myös rahoituslähteitä hankeidealle, rahoituslähteet ovat tässä taulukossa: ${fundingString}.`
         },
         {
           role: 'user', 
@@ -94,26 +90,16 @@ Deno.serve(async (req) => {
         }
       ],
       model: 'gpt-4o',
-      stream: true,
-      temperature: 0.1
+      stream: false,
+      temperature: 0
     });
 
-    const encoder = new TextEncoder();
-    const readableStream = new ReadableStream({
-      async start(controller) {
-        for await (const chunk of chatCompletionStream) {
-          controller.enqueue(encoder.encode(chunk.choices[0]?.delta?.content || ""));
-        }
-        controller.close();
-      }
-    })
+    reply = ExpertResponse.choices[0].message.content;
 
-    return new Response(readableStream, {
+    return new Response(JSON.stringify({ reply }), {
       status: 200,
-      headers: { 'Content-Type': 'text/plain', ...corsHeaders },
+      headers: { 'Content-Type': 'application/json', ...corsHeaders },
     })
-
-    //reply = chatCompletionStream.choices[0].message.content;
 
   } catch (error) {
     console.log(error);
