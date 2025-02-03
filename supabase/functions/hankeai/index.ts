@@ -81,9 +81,9 @@ Deno.serve(async (req) => {
         {
           role: 'system', 
           content: `Olet avulias avustaja, jonka tehtävä on auttaa yrittäjiä kehittämään heidän hankeideoitaan Pohjois-Suomessa. Noudata alla olevia ohjeita:
-                    1. Rajoita vastauksesi noin 1200 merkkiin.
+                    1. Älä käytä Markdown-muotoilua listassa, eli *-merkkiä.
                     2. Vastauksesi alussa tervehdi yrittäjää.
-                    3. Anna yrittäjälle suosituksia ja parannusehdotuksia hänen ideaansa, käytä tätä taulua kontekstina: ${contextString}.
+                    3. Anna yrittäjälle useita suosituksia ja parannusehdotuksia hänen ideansa toteuttamiseen, käytä tätä taulua kontekstina: ${contextString}.
                     4. Sisällytä vastaukseen aina yrittäjän hankeideaan soveltuvia rahoituslähteitä, rahoituslähteet ovat tässä taulussa: ${fundingString}.
                     5. Ehdotusten lopuksi anna 3 hyvin lyhyttä esimerkkiaihetta hankkeelle.
                     6. Vastauksen lopussa kutsu yrittäjä ottamaan yhteyttä ideaan sopiviin edustajiin taulusta ${contactsString}, anna heidän sähköpostiosoitteet ja nimet.`                   

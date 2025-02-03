@@ -24,6 +24,7 @@ const App = () => {
     setContactFormVisibilityState(false);
     setSupabasePromptButtonState(<></>);
     setSupabaseResponseState(<div className="loading-spinner"></div>);
+    setResponseVisibilityState(true);
     setSupabaseExpertResponseState(<div className="loading-spinner"></div>);
   
     try {
@@ -174,15 +175,15 @@ const App = () => {
             {supabasePromptButtonState}
           </form>
           
-          <button className="accordion" onClick={handleResponseAccordion}>Tekoälyn vastaus</button>
+          <button className="accordion" onClick={handleResponseAccordion}>Tekoälyn vastaus {responseVisibilityState ? <span className="accordion-open-close">▲</span> : <span className="accordion-open-close">▼</span>}</button>
           {responseVisibilityState ? <>{supabaseResponseState}</> : <></>}
           
-          <button className="accordion" onClick={handleExpertAccordion}>DEMO: Asiantuntijalle vastaus</button>
+          <button className="accordion" onClick={handleExpertAccordion}>DEMO: Asiantuntijalle vastaus {expertResponseVisibilityState ? <span className="accordion-open-close">▲</span> : <span className="accordion-open-close">▼</span>}</button>
           {expertResponseVisibilityState ? <>{supabaseExpertResponseState}</> : <></>}
           
           {contactFormVisibilityState && (
             <>
-            <button className="accordion" onClick={handleContactFormAccordion}>Yhteydenottolomake</button>
+            <button className="accordion" onClick={handleContactFormAccordion}>Yhteydenottolomake {contactFormAccordionState ? <span className="accordion-open-close">▲</span> : <span className="accordion-open-close">▼</span>}</button>
             {contactFormAccordionState ? 
             (<div className="accordion-content">
                 <form
