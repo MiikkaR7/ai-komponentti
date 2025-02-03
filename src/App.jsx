@@ -13,24 +13,29 @@ const App = () => {
   const [modalOpenState, setModalOpenState] = useState(false);
   const [userPromptState, setUserPromptState] = useState('');
 
+  //Accordions
+
+  const [responseVisibilityState, setResponseVisibilityState] = useState(false);
+  const [expertResponseVisibilityState, setExpertResponseVisibilityState] = useState(false);
+  const [contactFormAccordionState, setContactFormAccordionState] = useState(false);
+
   const handleSubmit = async (event) => {
     event.preventDefault();
+    setContactFormVisibilityState(false);
+    setSupabasePromptButtonState(<></>);
     setSupabaseResponseState(<div className="loading-spinner"></div>);
+    setSupabaseExpertResponseState(<div className="loading-spinner"></div>);
   
     try {
 
-      const { data } = await supabase.functions.invoke('hankeai-expert',{
+      const { data } = await supabase.functions.invoke('hankeai-expert', {
         body: JSON.stringify({query: userPromptState})
       });
 
-      let parsedReply;
-
-      parsedReply = data.reply.replaceAll('*', '');
-
-      setSupabaseExpertResponseState(
+      await setSupabaseExpertResponseState(
         <>
         <p>Expert response:</p>
-        <div className="ai-response">{parsedReply.split('\n').map((line, index) => (
+        <div className="ai-response">{data.reply.split('\n').map((line, index) => (
           <p key={index}>{line}</p>
         ))}</div>
         </>
@@ -66,6 +71,7 @@ const App = () => {
         </div>
       );
     }
+    setContactFormVisibilityState(true);
   };
   
 
@@ -109,11 +115,27 @@ const App = () => {
   const handleNewUserInput = () => {
     setUserPromptState('');
     setSupabaseResponseState(<></>);
+    setSupabaseExpertResponseState(<></>);
+    setResponseVisibilityState(false);
+    setExpertResponseVisibilityState(false);
+    setContactFormAccordionState(false);
     setModalOpenState(false);
   }
 
   const handleUserInput = (e) => {
     setUserPromptState(e.target.value)
+  }
+
+  const handleResponseAccordion = () => {
+    setResponseVisibilityState(!responseVisibilityState);
+  }
+
+  const handleExpertAccordion = () => {
+    setExpertResponseVisibilityState(!expertResponseVisibilityState);
+  }
+
+  const handleContactFormAccordion = () => {
+    setContactFormAccordionState(!contactFormAccordionState);
   }
 
   return (
@@ -133,9 +155,7 @@ const App = () => {
               </button>
             </div>
           </div>
-
       ) : (
-
         <div className="ai-komponentti">
           <h1 className="komponentti-header">Hankeideatyökalu</h1>
           <form className="user-prompt-form" onSubmit={handleSubmit}>
@@ -153,67 +173,72 @@ const App = () => {
             />
             {supabasePromptButtonState}
           </form>
-          {supabaseResponseState}
-          {supabaseExpertResponseState}
-
-        {contactFormVisibilityState ?
-
-          <>
-          <h1 className="contact-form-header">Ota yhteyttä</h1>
-          <form
-            className="contact-form"
-            onSubmit={async (e) => {
-              e.preventDefault();
-              const formData = new FormData(e.target);
-              await handleContactForm(formData, e.target);
-            }}
-          >
-
-
-            <div className="contact-form-inputs">
-              <input 
-                name="contact-form-name"
-                className="contact-form-inputs-input"
-                placeholder="Nimi" 
-                required/>
-              <input
-                name="contact-form-sender"
-                className="contact-form-inputs-input"
-                placeholder="Sähköpostiosoite"
-                type="email"
-                required/>
-              <input 
-                name="contact-form-subject"
-                className="contact-form-inputs-input"
-                placeholder="Hankeidea" 
-                required/>
-              <select 
-                name="contact-form-recipient" 
-                className="contact-form-select">
-                <option value="miikka@testi.fi">miikka@testi.fi</option>
-              </select>
-            </div>
-            <textarea
-              name="contact-form-message"
-              placeholder="Viesti"
-              className="contact-form-textarea"
-              type="text"
-              cols="100"
-              rows="10"
-              required
-            />
-            <input className="contact-form-button" type="submit" value="Lähetä" />
-          </form>
-          </>
-        : 
-        <>
-        </>
-        }
           
+          <button className="accordion" onClick={handleResponseAccordion}>Tekoälyn vastaus</button>
+          {responseVisibilityState ? <>{supabaseResponseState}</> : <></>}
+          
+          <button className="accordion" onClick={handleExpertAccordion}>DEMO: Asiantuntijalle vastaus</button>
+          {expertResponseVisibilityState ? <>{supabaseExpertResponseState}</> : <></>}
+          
+          {contactFormVisibilityState && (
+            <>
+            <button className="accordion" onClick={handleContactFormAccordion}>Yhteydenottolomake</button>
+            {contactFormAccordionState ? 
+            (<div className="accordion-content">
+                <form
+                  className="contact-form"
+                  onSubmit={async (e) => {
+                    e.preventDefault();
+                    const formData = new FormData(e.target);
+                    await handleContactForm(formData, e.target);
+                  }}
+                >
+                  <div className="contact-form-inputs">
+                    <input 
+                      name="contact-form-name"
+                      className="contact-form-inputs-input"
+                      placeholder="Nimi" 
+                      required
+                    />
+                    <input
+                      name="contact-form-sender"
+                      className="contact-form-inputs-input"
+                      placeholder="Sähköpostiosoite"
+                      type="email"
+                      required
+                    />
+                    <input 
+                      name="contact-form-subject"
+                      className="contact-form-inputs-input"
+                      placeholder="Hankeidea" 
+                      required
+                    />
+                    <select 
+                      name="contact-form-recipient" 
+                      className="contact-form-select"
+                    >
+                      <option value="miikka@testi.fi">miikka@testi.fi</option>
+                    </select>
+                  </div>
+                  <textarea
+                    name="contact-form-message"
+                    placeholder="Viesti"
+                    className="contact-form-textarea"
+                    type="text"
+                    cols="100"
+                    rows="10"
+                    required
+                  />
+                  <input className="contact-form-button" type="submit" value="Lähetä" />
+                </form>
+              </div>) : <></>}
+            </>
+          )}
         </div>
       )}
     </>
   );
+
   
 
 }
