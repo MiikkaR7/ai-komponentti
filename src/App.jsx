@@ -34,7 +34,6 @@ const App = () => {
 
       await setSupabaseExpertResponseState(
         <>
-        <p>Expert response:</p>
         <div className="ai-response">{data.reply.split('\n').map((line, index) => (
           <p key={index}>{line}</p>
         ))}</div>
@@ -71,6 +70,7 @@ const App = () => {
         </div>
       );
     }
+    setSupabasePromptButtonState(<input className="user-prompt-form-button" type="submit" value="Sparraa" />);
     setContactFormVisibilityState(true);
   };
   
