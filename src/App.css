@@ -21,21 +21,23 @@
 }
 
 .user-prompt-form {
+    position: relative;
     display: grid;
-    justify-self: center;
+    max-width: 470px;
     margin-bottom: 20px;
+    margin-left: 15px;
 }
 
 .user-prompt-form-textarea {
-    width: 450px;
-    height: 130px;
+    width: 470px;
+    height: 200px;
     margin: 0 auto;
     padding: 10px;
     box-sizing: border-box;
     border: 1px solid #ccc;
     border-radius: 5px;
     outline: none;
-    font-size: 14px;
+    font-size: 13px;
     font-family: 'Manrope', sans-serif;
     resize: none;
 }
@@ -46,17 +48,34 @@
 }
 
 .user-prompt-form-button {
-    justify-self: center;
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
     font-family: 'Manrope', sans-serif;
-    width: 95px;
-    height: 40px;
-    margin-top: 10px;
-    font-size: 16px;
+    text-align: center;
+    width: 70px;
+    height: 35px;
+    font-size: 14px;
     color: #000000;
     background-color: #ffffff;
     border: 1px solid #000000;
     border-radius: 3px;
     cursor: pointer;
+}
+
+.user-prompt-form-button-disabled {
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    font-family: 'Manrope', sans-serif;
+    text-align: center;
+    width: 70px;
+    height: 35px;
+    font-size: 14px;
+    color: #d8d8d8;
+    background-color: #ffffff;
+    border: 1px solid #d8d8d8;
+    border-radius: 3px;
 }
 
 .user-prompt-form-button:hover {
@@ -67,7 +86,7 @@
 
 .ai-response {
     width: 453px;
-    height: 200px;
+    max-height: 200px;
     margin: 0 auto;
     padding: 10px;
     overflow-y: auto;
