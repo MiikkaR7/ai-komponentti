@@ -116,6 +116,8 @@ const App = () => {
 
   }
 
+  //After submitting contact form, continue prompt or new prompt
+
   const handleContinue = () => {
     setModalOpenState(false);
   }
@@ -130,9 +132,13 @@ const App = () => {
     setModalOpenState(false);
   }
 
+  //Track user input
+
   const handleUserInput = (e) => {
     setUserPromptState(e.target.value)
   }
+
+  //Accordion close/open functions
 
   const handleResponseAccordion = () => {
     setResponseVisibilityState(!responseVisibilityState);
@@ -142,7 +148,12 @@ const App = () => {
     setExpertResponseVisibilityState(!expertResponseVisibilityState);
   }
 
-  const handleContactFormAccordion = () => {
+  const handleContactFormAccordion = (event) => {
+
+    if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA" || event.target.tagName === "SELECT" || event.target.tagName === "SPAN") {
+      event.stopPropagation();
+      return;
+    }
     setContactFormAccordionState(!contactFormAccordionState);
   }
 
@@ -180,15 +191,21 @@ const App = () => {
             {supabasePromptButtonState}
           </form>
           
-          <button className="accordion" onClick={handleResponseAccordion}>Tekoälyn vastaus {responseVisibilityState ? <span className="accordion-open-close">▲</span> : <span className="accordion-open-close">▼</span>}</button>
-          {responseVisibilityState && <>{supabaseResponseState}</>}
+          <button className="accordion" onClick={handleResponseAccordion}>Tekoälyn vastaus
+            {responseVisibilityState ? <span className="accordion-open-close">▲</span> : <span className="accordion-open-close">▼</span>}
+            {responseVisibilityState && <>{supabaseResponseState}</>}
+          </button>
           
-          <button className="accordion" onClick={handleExpertAccordion}>DEMO: Asiantuntijalle vastaus {expertResponseVisibilityState ? <span className="accordion-open-close">▲</span> : <span className="accordion-open-close">▼</span>}</button>
-          {expertResponseVisibilityState && <>{supabaseExpertResponseState}</>}
-          
+          <button className="accordion" onClick={handleExpertAccordion}>DEMO: Asiantuntijalle vastaus
+            {expertResponseVisibilityState ? <span className="accordion-open-close">▲</span> : <span className="accordion-open-close">▼</span>}
+            {expertResponseVisibilityState && <>{supabaseExpertResponseState}</>}
+          </button>
+
           {contactFormVisibilityState && (
             <>
-            <button className="accordion" onClick={handleContactFormAccordion}>Yhteydenottolomake {contactFormAccordionState ? <span className="accordion-open-close">▲</span> : <span className="accordion-open-close">▼</span>}</button>
+            <button className="accordion" onClick={(e) => handleContactFormAccordion(e)}>Yhteydenottolomake
+              {contactFormAccordionState ? <span className="accordion-open-close">▲</span> : <span className="accordion-open-close">▼</span>}
+
             {contactFormAccordionState && 
             (<div className="accordion-content">
                 <form
@@ -199,7 +216,7 @@ const App = () => {
                     await handleContactForm(formData, e.target);
                   }}
                 >
-                  <div className="contact-form-inputs">
+                  <span className="contact-form-inputs">
                     <input 
                       name="contact-form-name"
                       className="contact-form-inputs-input"
@@ -225,7 +242,7 @@ const App = () => {
                     >
                       <option value="miikka@testi.fi">miikka@testi.fi</option>
                     </select>
-                  </div>
+                  </span>
                   <textarea
                     name="contact-form-message"
                     placeholder="Viesti"
@@ -238,6 +255,7 @@ const App = () => {
                   <input className="contact-form-button" type="submit" value="Lähetä" />
                 </form>
               </div>)}
+              </button>
             </>
           )}
         </div>
