@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
 
     const fetchContextFromDb = await connection.queryObject(`SELECT name, description, metainfo FROM generalinfo WHERE (metainfo LIKE '%yrittaja%')`);
     const fetchFundingFromDb = await connection.queryObject('SELECT (name, description) FROM funding');
-    const fetchContactsFromDb = await connection.queryObject('SELECT (etunimi, sahkopostiosoite) FROM contacts');
+    const fetchContactsFromDb = await connection.queryObject('SELECT (etunimi, sahkopostiosoite, avainsanat) FROM contacts');
 
     const context = fetchContextFromDb.rows;
     const funding = fetchFundingFromDb.rows;
@@ -83,10 +83,10 @@ Deno.serve(async (req) => {
           content: `Olet avulias avustaja, jonka tehtävä on auttaa yrittäjiä kehittämään heidän hankeideoitaan Pohjois-Suomessa. Noudata alla olevia ohjeita:
                     1. Älä käytä Markdown-muotoilua listassa, eli *-merkkiä.
                     2. Vastauksesi alussa tervehdi yrittäjää.
-                    3. Anna yrittäjälle useita suosituksia ja parannusehdotuksia hänen ideansa toteuttamiseen, käytä tätä taulua kontekstina: ${contextString}.
+                    3. Anna yrittäjälle useita suosituksia ja parannusehdotuksia hänen ideansa toteuttamiseen.
                     4. Sisällytä vastaukseen aina yrittäjän hankeideaan soveltuvia rahoituslähteitä, rahoituslähteet ovat tässä taulussa: ${fundingString}.
                     5. Ehdotusten lopuksi anna 3 hyvin lyhyttä esimerkkiaihetta hankkeelle.
-                    6. Vastauksen lopussa kutsu yrittäjä ottamaan yhteyttä ideaan sopiviin edustajiin taulusta ${contactsString}, anna heidän sähköpostiosoitteet ja nimet.`                   
+                    6. Vertaa yrittäjän antamaa hankeideaa taulun ${contactsString} edustajien avainsanat-sarakkeeseen, ja anna heidän yhteystiedot yrittäjälle viestin lopussa.`                   
         },
         {
           role: 'user', 
@@ -95,7 +95,6 @@ Deno.serve(async (req) => {
       ],
       model: 'gpt-4o',
       stream: true,
-      temperature: 0.1
     });
 
     const encoder = new TextEncoder();

@@ -78,10 +78,11 @@ Deno.serve(async (req) => {
         {
           role: 'system', 
           content: `Olet avustaja, jonka tehtävä on auttaa Lapin AMK:n hankevalmistelijoita, kontekstia: ${contextString}. Noudata alla olevia ohjeita:
-                    1. Rajoita vastauksesi noin 1200 merkkiin.
-                    2. Tee johtopäätös siitä, soveltuuko idea paremmin opiskelijayhteistyöksi vai hankkeeksi käyttämällä kontekstia.
-                    3. Jos idea soveltuu hankkeeksi, päätä onko hanke tutkimus- vai aluekehityspainotteinen.
-                    4. Anna hankevalmistelijalle näkökulmia ja toteutustapoja vastaanotettuun ideaan.
+                    1. Älä käytä Markdown-muotoilua listassa, eli *-merkkiä.
+                    2. Rajoita vastauksesi noin 1200 merkkiin.
+                    3. Tee johtopäätös siitä, soveltuuko idea paremmin opiskelijayhteistyöksi vai hankkeeksi käyttämällä kontekstia.
+                    4. Jos idea soveltuu hankkeeksi, päätä onko hanke tutkimus- vai aluekehityspainotteinen.
+                    5. Anna hankevalmistelijalle näkökulmia ja toteutustapoja vastaanotettuun ideaan.
                     6. Ehdota hankevalmistelijalle myös rahoituslähteitä hankeidealle, rahoituslähteet ovat tässä taulukossa: ${fundingString}.`
         },
         {

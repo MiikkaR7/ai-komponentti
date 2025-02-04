@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import './App.css';
 
 const App = () => {
@@ -7,8 +7,8 @@ const App = () => {
   const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
   const [contactFormVisibilityState, setContactFormVisibilityState] = useState(true);
-  const [supabaseResponseState, setSupabaseResponseState] = useState(<></>);
-  const [supabaseExpertResponseState, setSupabaseExpertResponseState] = useState(<></>);
+  const [supabaseResponseState, setSupabaseResponseState] = useState("");
+  const [supabaseExpertResponseState, setSupabaseExpertResponseState] = useState("");
   const [supabasePromptButtonState, setSupabasePromptButtonState] = useState(<input className="user-prompt-form-button" type="submit" value="Sparraa" />);
   const [modalOpenState, setModalOpenState] = useState(false);
   const [userPromptState, setUserPromptState] = useState('');
@@ -18,11 +18,12 @@ const App = () => {
   const [responseVisibilityState, setResponseVisibilityState] = useState(false);
   const [expertResponseVisibilityState, setExpertResponseVisibilityState] = useState(false);
   const [contactFormAccordionState, setContactFormAccordionState] = useState(false);
+  const supabaseResponseRef = useRef(null);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
     setContactFormVisibilityState(false);
-    setSupabasePromptButtonState(<></>);
+    setSupabasePromptButtonState(<input className="user-prompt-form-button-disabled" value="Sparraa" disabled />);
     setSupabaseResponseState(<div className="loading-spinner"></div>);
     setResponseVisibilityState(true);
     setSupabaseExpertResponseState(<div className="loading-spinner"></div>);
@@ -60,9 +61,8 @@ const App = () => {
         const chunk = decoder.decode(value, { stream: true });
         accumulatedText += chunk;
   
-        setSupabaseResponseState(
-          <div className="ai-response">{accumulatedText}</div>
-        );
+        setSupabaseResponseState(<div className="ai-response" ref={supabaseResponseRef}>{accumulatedText}</div>);
+
       }
     } catch (error) {
       setSupabaseResponseState(
@@ -74,6 +74,15 @@ const App = () => {
     setSupabasePromptButtonState(<input className="user-prompt-form-button" type="submit" value="Sparraa" />);
     setContactFormVisibilityState(true);
   };
+
+  //Scroll AI response automatically
+
+  useEffect(() => {
+    if (supabaseResponseRef.current) {
+      supabaseResponseRef.current.scrollTop = supabaseResponseRef.current.scrollHeight;
+    }
+  }, [supabaseResponseState]);
+  
   
 
   const handleContactForm = async (formData, formElement) => {
@@ -109,23 +118,29 @@ const App = () => {
 
   }
 
+  //After submitting contact form, continue prompt or new prompt
+
   const handleContinue = () => {
     setModalOpenState(false);
   }
 
   const handleNewUserInput = () => {
-    setUserPromptState('');
-    setSupabaseResponseState(<></>);
-    setSupabaseExpertResponseState(<></>);
+    setUserPromptState("");
+    setSupabaseResponseState("");
+    setSupabaseExpertResponseState("");
     setResponseVisibilityState(false);
     setExpertResponseVisibilityState(false);
     setContactFormAccordionState(false);
     setModalOpenState(false);
   }
 
+  //Track user input
+
   const handleUserInput = (e) => {
     setUserPromptState(e.target.value)
   }
+
+  //Accordion close/open functions
 
   const handleResponseAccordion = () => {
     setResponseVisibilityState(!responseVisibilityState);
@@ -135,7 +150,13 @@ const App = () => {
     setExpertResponseVisibilityState(!expertResponseVisibilityState);
   }
 
-  const handleContactFormAccordion = () => {
+  const handleContactFormAccordion = (event) => {
+
+    // Dont trigger function if trying to use the contact form
+    if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA" || event.target.tagName === "SELECT" || event.target.tagName === "SPAN") {
+      event.stopPropagation();
+      return;
+    }
     setContactFormAccordionState(!contactFormAccordionState);
   }
 
@@ -166,25 +187,29 @@ const App = () => {
               name="user-prompt"
               className="user-prompt-form-textarea"
               placeholder="Kirjoita hankeideasi tähän..."
-              cols="100"
-              rows="10"
               type="text"
-              maxLength="544"
+              maxLength="500"
               required
             />
             {supabasePromptButtonState}
           </form>
           
-          <button className="accordion" onClick={handleResponseAccordion}>Tekoälyn vastaus {responseVisibilityState ? <span className="accordion-open-close">▲</span> : <span className="accordion-open-close">▼</span>}</button>
-          {responseVisibilityState ? <>{supabaseResponseState}</> : <></>}
+          <button className="accordion" onClick={handleResponseAccordion}>Tekoälyn vastaus
+            {responseVisibilityState ? <span className="accordion-open-close">▲</span> : <span className="accordion-open-close">▼</span>}
+            {responseVisibilityState && <>{supabaseResponseState}</>}
+          </button>
           
-          <button className="accordion" onClick={handleExpertAccordion}>DEMO: Asiantuntijalle vastaus {expertResponseVisibilityState ? <span className="accordion-open-close">▲</span> : <span className="accordion-open-close">▼</span>}</button>
-          {expertResponseVisibilityState ? <>{supabaseExpertResponseState}</> : <></>}
-          
+          <button className="accordion" onClick={handleExpertAccordion}>DEMO: Asiantuntijalle vastaus
+            {expertResponseVisibilityState ? <span className="accordion-open-close">▲</span> : <span className="accordion-open-close">▼</span>}
+            {expertResponseVisibilityState && <>{supabaseExpertResponseState}</>}
+          </button>
+
           {contactFormVisibilityState && (
             <>
-            <button className="accordion" onClick={handleContactFormAccordion}>Yhteydenottolomake {contactFormAccordionState ? <span className="accordion-open-close">▲</span> : <span className="accordion-open-close">▼</span>}</button>
-            {contactFormAccordionState ? 
+            <button className="accordion" onClick={(e) => handleContactFormAccordion(e)}>Yhteydenottolomake
+              {contactFormAccordionState ? <span className="accordion-open-close">▲</span> : <span className="accordion-open-close">▼</span>}
+
+            {contactFormAccordionState && 
             (<div className="accordion-content">
                 <form
                   className="contact-form"
@@ -194,7 +219,7 @@ const App = () => {
                     await handleContactForm(formData, e.target);
                   }}
                 >
-                  <div className="contact-form-inputs">
+                  <span className="contact-form-inputs">
                     <input 
                       name="contact-form-name"
                       className="contact-form-inputs-input"
@@ -220,7 +245,7 @@ const App = () => {
                     >
                       <option value="miikka@testi.fi">miikka@testi.fi</option>
                     </select>
-                  </div>
+                  </span>
                   <textarea
                     name="contact-form-message"
                     placeholder="Viesti"
@@ -232,7 +257,8 @@ const App = () => {
                   />
                   <input className="contact-form-button" type="submit" value="Lähetä" />
                 </form>
-              </div>) : <></>}
+              </div>)}
+              </button>
             </>
           )}
         </div>
