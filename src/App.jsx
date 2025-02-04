@@ -75,6 +75,8 @@ const App = () => {
     setContactFormVisibilityState(true);
   };
 
+  //Scroll AI response automatically
+
   useEffect(() => {
     if (supabaseResponseRef.current) {
       supabaseResponseRef.current.scrollTop = supabaseResponseRef.current.scrollHeight;
@@ -123,7 +125,7 @@ const App = () => {
   }
 
   const handleNewUserInput = () => {
-    setUserPromptState('');
+    setUserPromptState("");
     setSupabaseResponseState("");
     setSupabaseExpertResponseState("");
     setResponseVisibilityState(false);
@@ -150,6 +152,7 @@ const App = () => {
 
   const handleContactFormAccordion = (event) => {
 
+    // Dont trigger function if trying to use the contact form
     if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA" || event.target.tagName === "SELECT" || event.target.tagName === "SPAN") {
       event.stopPropagation();
       return;
