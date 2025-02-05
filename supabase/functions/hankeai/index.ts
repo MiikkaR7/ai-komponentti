@@ -3,6 +3,8 @@ import * as postgres from 'https://deno.land/x/postgres@v0.17.0/mod.ts';
 import OpenAI from 'https://deno.land/x/openai@v4.24.0/mod.ts'
 import { Ratelimit } from "https://cdn.skypack.dev/@upstash/ratelimit@latest";
 import { Redis } from "https://esm.sh/@upstash/redis@1.34.3";
+import { zodResponseFormat } from 'https://deno.land/x/openai@v4.55.1/helpers/zod.ts';
+import z from "npm:zod@^3.24.1";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -62,42 +64,57 @@ Deno.serve(async (req) => {
 
     // Tietokannasta haetaan kontekstia, rahoituslähteet ja yhteystiedot.
 
-    const fetchContextFromDb = await connection.queryObject(`SELECT name, description, metainfo FROM generalinfo WHERE (metainfo LIKE '%yrittaja%')`);
+    //const fetchContextFromDb = await connection.queryObject(`SELECT name, description, metainfo FROM generalinfo WHERE (metainfo LIKE '%yrittaja%')`);
     const fetchFundingFromDb = await connection.queryObject('SELECT (name, description) FROM funding');
     const fetchContactsFromDb = await connection.queryObject('SELECT (etunimi, sahkopostiosoite, avainsanat) FROM contacts');
 
-    const context = fetchContextFromDb.rows;
+    //const context = fetchContextFromDb.rows;
     const funding = fetchFundingFromDb.rows;
     const contacts = fetchContactsFromDb.rows;
 
-    const contextString = JSON.stringify(context);
+    //const contextString = JSON.stringify(context);
     const fundingString = JSON.stringify(funding);
     const contactsString = JSON.stringify(contacts);
 
-    //Tekoälylle tehtävä pyyntö, jossa määritetään vastaajan rooli
+    //Tekoälylle tehtävä pyyntö
 
-    const chatCompletionStream = await openai.chat.completions.create({
+    const jsonReplyFormat = z.object({
+      content: z.string(),
+      subject: z.string(),
+      recipient: z.string(),
+      message: z.string()
+    });
+
+    const aiResponse = await openai.chat.completions.create({
+      model: "gpt-4o-2024-08-06",
       messages: [
         {
           role: 'system', 
           content: `Olet avulias avustaja, jonka tehtävä on auttaa yrittäjiä kehittämään heidän hankeideoitaan Pohjois-Suomessa. Noudata alla olevia ohjeita:
-                    1. Älä käytä Markdown-muotoilua listassa, eli *-merkkiä.
-                    2. Vastauksesi alussa tervehdi yrittäjää.
-                    3. Anna yrittäjälle useita suosituksia ja parannusehdotuksia hänen ideansa toteuttamiseen.
-                    4. Sisällytä vastaukseen aina yrittäjän hankeideaan soveltuvia rahoituslähteitä, rahoituslähteet ovat tässä taulussa: ${fundingString}.
-                    5. Ehdotusten lopuksi anna 3 hyvin lyhyttä esimerkkiaihetta hankkeelle.
-                    6. Vertaa yrittäjän antamaa hankeideaa taulun ${contactsString} edustajien avainsanat-sarakkeeseen, ja anna heidän yhteystiedot yrittäjälle viestin lopussa.`                   
+                    1. Vastauksesi alussa tervehdi yrittäjää.
+                    2. Anna yrittäjälle useita suosituksia ja parannusehdotuksia hänen ideansa toteuttamiseen, 
+                    muotoile ehdotukset seuraavalla tavalla ilman luettelomerkkejä vaihtamalla esimerkkiotsikon ehdotukseen sopivaksi:
+                    Laajenna palveluverkostoasi
+                    Hyödynnä digitaalista markkinointia
+                    Hae alueellisia tukia
+                    jne.
+                    3. Sisällytä vastaukseen aina yrittäjän hankeideaan soveltuvia rahoituslähteitä, rahoituslähteet ovat tässä taulussa: ${fundingString}.
+                    4. Ehdotusten lopuksi anna  hyvin lyhyt esimerkkiaihe hankkeelle.
+                    5. Vertaa yrittäjän antamaa hankeideaa taulun ${contactsString} edustajien avainsanat-sarakkeeseen, ja anna heidän yhteystiedot yrittäjälle viestin lopussa.
+                    6. Laita viestin sisältö content-kenttään, edustajan sähköpostiosoite recipient-kenttään ja hankkeen esimerkkiaihe subject-kenttään, 
+                    ja tiivistä antamasi vastaus sähköpostiin sopivaksi message-kenttään, kirjoita sähköpostiviesti minä-muodossa.`         
         },
         {
           role: 'user', 
           content: query 
         }
       ],
-      model: 'gpt-4o',
-      stream: true,
+      response_format: zodResponseFormat(jsonReplyFormat, "hankeidea"),
+      stream: false,
+      temperature: 0.3
     });
 
-    const encoder = new TextEncoder();
+    /* const encoder = new TextEncoder();
     const readableStream = new ReadableStream({
       async start(controller) {
         for await (const chunk of chatCompletionStream) {
@@ -105,14 +122,14 @@ Deno.serve(async (req) => {
         }
         controller.close();
       }
-    })
+    }); */
 
-    return new Response(readableStream, {
-      status: 200,
-      headers: { 'Content-Type': 'text/plain', ...corsHeaders },
-    })
+  const reply = aiResponse.choices[0].message.content;
 
-    //reply = chatCompletionStream.choices[0].message.content;
+  return new Response(reply, {
+    status: 200,
+    headers: { 'Content-Type': 'application/json', ...corsHeaders },
+  });
 
   } catch (error) {
     console.log(error);
