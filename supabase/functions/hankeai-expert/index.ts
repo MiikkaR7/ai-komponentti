@@ -71,36 +71,35 @@ Deno.serve(async (req) => {
 
     //Tekoälylle tehtävä pyyntö, jossa määritetään vastaajan rooli
 
-    let reply;
-
     const ExpertResponse = await openai.chat.completions.create({
+      model: "gpt-4o",
       messages: [
         {
           role: 'system', 
-          content: `Olet avustaja, jonka tehtävä on auttaa Lapin AMK:n hankevalmistelijoita, kontekstia: ${contextString}. Noudata alla olevia ohjeita:
+          content: `Olet avustaja, jonka tehtävä on auttaa Lapin AMK:n hankevalmistelijoita, vastaanottamalla yrittäjän hankeidea ja laatimalla siitä hankevalmistelijalle viesti.
+                    Käytä kontekstina ${contextString}. Noudata alla olevia ohjeita:
                     1. Älä käytä Markdown-muotoilua listassa, eli *-merkkiä.
                     2. Rajoita vastauksesi noin 1200 merkkiin.
                     3. Tee johtopäätös siitä, soveltuuko idea paremmin opiskelijayhteistyöksi vai hankkeeksi käyttämällä kontekstia.
                     4. Jos idea soveltuu hankkeeksi, päätä onko hanke tutkimus- vai aluekehityspainotteinen.
                     5. Anna hankevalmistelijalle näkökulmia ja toteutustapoja vastaanotettuun ideaan.
-                    6. Ehdota hankevalmistelijalle myös rahoituslähteitä hankeidealle, rahoituslähteet ovat tässä taulukossa: ${fundingString}.`
+                    7. Ehdota hankevalmistelijalle myös rahoituslähteitä hankeidealle, rahoituslähteet ovat tässä taulukossa: ${fundingString}.`
         },
         {
           role: 'user', 
-          content: query 
+          content: query
         }
       ],
-      model: 'gpt-4o',
       stream: false,
       temperature: 0
     });
 
-    reply = ExpertResponse.choices[0].message.content;
+    const reply = ExpertResponse.choices[0].message.content;
 
-    return new Response(JSON.stringify({ reply }), {
+    return new Response(JSON.stringify({reply}), {
       status: 200,
       headers: { 'Content-Type': 'application/json', ...corsHeaders },
-    })
+    });
 
   } catch (error) {
     console.log(error);

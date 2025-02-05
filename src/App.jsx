@@ -30,11 +30,17 @@ const App = () => {
   
     try {
 
-      const { data } = await supabase.functions.invoke('hankeai-expert', {
+      const { data, error } = await supabase.functions.invoke('hankeai-expert', {
         body: JSON.stringify({query: userPromptState})
       });
 
-      await setSupabaseExpertResponseState(
+      if (error) {
+        throw new Error;
+      }
+
+      console.log(data);
+
+      setSupabaseExpertResponseState(
         <>
         <div className="ai-response">{data.reply.split('\n').map((line, index) => (
           <p key={index}>{line}</p>
@@ -42,7 +48,27 @@ const App = () => {
         </>
       );
 
-      const response = await fetch(process.env.SUPABASE_URL + "/functions/v1/hankeai", {
+    } catch (error) {
+      setSupabaseExpertResponseState(
+        <div className="ai-response-error">
+          <p>Error: {error.message}</p>
+        </div>
+      );
+    }
+
+    try {
+
+      const { data, error } = await supabase.functions.invoke('hankeai', {
+        body: JSON.stringify({query: userPromptState})
+      });
+
+      if (error) {
+        throw new Error;
+      }
+
+      console.log(data);
+
+      /* const response = await fetch(process.env.SUPABASE_URL + "/functions/v1/hankeai", {
         method: "POST",
         headers: { "Content-Type": "application/json", "Authorization": "Bearer " + process.env.SUPABASE_ANON_KEY },
         body: JSON.stringify({ query: userPromptState }),
@@ -60,10 +86,17 @@ const App = () => {
   
         const chunk = decoder.decode(value, { stream: true });
         accumulatedText += chunk;
-  
-        setSupabaseResponseState(<div className="ai-response" ref={supabaseResponseRef}>{accumulatedText}</div>);
 
-      }
+      } */
+  
+        setSupabaseResponseState(
+          <>
+          <div className="ai-response">{data.content.split('\n').map((line, index) => (
+            <p key={index}>{line}</p>
+          ))}</div>
+          </>
+        );
+
     } catch (error) {
       setSupabaseResponseState(
         <div className="ai-response-error">
@@ -77,11 +110,11 @@ const App = () => {
 
   //Scroll AI response automatically
 
-  useEffect(() => {
+  /* useEffect(() => {
     if (supabaseResponseRef.current) {
       supabaseResponseRef.current.scrollTop = supabaseResponseRef.current.scrollHeight;
     }
-  }, [supabaseResponseState]);
+  }, [supabaseResponseState]); */
   
   
 
