@@ -81,7 +81,8 @@ Deno.serve(async (req) => {
     const jsonReplyFormat = z.object({
       content: z.string(),
       subject: z.string(),
-      recipient: z.string()
+      recipient: z.string(),
+      message: z.string()
     });
 
     const aiResponse = await openai.chat.completions.create({
@@ -100,7 +101,8 @@ Deno.serve(async (req) => {
                     3. Sisällytä vastaukseen aina yrittäjän hankeideaan soveltuvia rahoituslähteitä, rahoituslähteet ovat tässä taulussa: ${fundingString}.
                     4. Ehdotusten lopuksi anna  hyvin lyhyt esimerkkiaihe hankkeelle.
                     5. Vertaa yrittäjän antamaa hankeideaa taulun ${contactsString} edustajien avainsanat-sarakkeeseen, ja anna heidän yhteystiedot yrittäjälle viestin lopussa.
-                    6. Laita viestin sisältö content-kenttään, edustajan sähköpostiosoite recipient-kenttään ja hankkeen esimerkkiaihe subject-kenttään.`                 
+                    6. Laita viestin sisältö content-kenttään, edustajan sähköpostiosoite recipient-kenttään ja hankkeen esimerkkiaihe subject-kenttään, 
+                    ja tiivistä antamasi vastaus sähköpostiin sopivaksi message-kenttään, kirjoita sähköpostiviesti minä-muodossa.`         
         },
         {
           role: 'user', 
