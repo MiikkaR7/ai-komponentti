@@ -56,8 +56,6 @@ Deno.serve(async (req) => {
 
     const queryEmbedding = embedding.data[0].embedding;
 
-    console.log("queryEmbedding length: " + queryEmbedding.length);
-
     const matchThreshold = 0.33;
     const matchCount = 5;
     const supabase = createClient(supabaseUrl, supabaseKey);
