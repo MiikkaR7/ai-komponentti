@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
 
     //Query embedding
 
-    const embedding = await openai.embeddings.create({
+    /* const embedding = await openai.embeddings.create({
       model: "text-embedding-3-small",
       input: query,
       encoding_format: "float",
@@ -71,7 +71,7 @@ Deno.serve(async (req) => {
       throw new Error('Error finding matching embeddings from Supabase: ' + error.message);
     }
 
-    console.log("Match data: " + JSON.stringify(data, null, 2));
+    console.log("Match data: " + JSON.stringify(data, null, 2)); */
 
 
     //Rate limit
