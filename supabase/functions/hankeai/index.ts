@@ -4,11 +4,12 @@ import OpenAI from 'https://deno.land/x/openai@v4.24.0/mod.ts'
 import { Ratelimit } from "https://cdn.skypack.dev/@upstash/ratelimit@latest";
 import { Redis } from "https://esm.sh/@upstash/redis@1.34.3";
 import { zodResponseFormat } from 'https://deno.land/x/openai@v4.55.1/helpers/zod.ts';
+import { createClient } from 'jsr:@supabase/supabase-js@2';
 import z from "npm:zod@^3.24.1";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, api_key, content-type',
 };
 
 
@@ -20,6 +21,9 @@ const corsHeaders = {
 const databaseUrl = Deno.env.get('SUPABASE_DB_URL');
 const pool = new postgres.Pool(databaseUrl, 100, true);
 const connection = await pool.connect();
+
+const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
+const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
 
 Deno.serve(async (req) => {
 
@@ -38,9 +42,39 @@ Deno.serve(async (req) => {
     apiKey: apiKey,
   });
 
-  let reply;
-
   try {
+
+    //Query embedding
+
+    const embedding = await openai.embeddings.create({
+      model: "text-embedding-3-small",
+      input: query,
+      encoding_format: "float",
+
+      
+    });
+
+    const queryEmbedding = embedding.data[0].embedding;
+
+    console.log("queryEmbedding length: " + queryEmbedding.length);
+
+    const matchThreshold = 0.33;
+    const matchCount = 5;
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const { data , error } = await supabase
+      .rpc('match_funding', {
+        query_embedding: queryEmbedding,
+        match_threshold: matchThreshold,
+        match_count: matchCount
+      });
+
+    if (error) {
+      throw new Error('Error finding matching embeddings from Supabase: ' + error.message);
+    }
+
+    console.log("Match data: " + JSON.stringify(data, null, 2));
+
 
     //Rate limit
 
@@ -101,28 +135,19 @@ Deno.serve(async (req) => {
                     3. Sisällytä vastaukseen aina yrittäjän hankeideaan soveltuvia rahoituslähteitä, rahoituslähteet ovat tässä taulussa: ${fundingString}.
                     4. Ehdotusten lopuksi anna  hyvin lyhyt esimerkkiaihe hankkeelle.
                     5. Vertaa yrittäjän antamaa hankeideaa taulun ${contactsString} edustajien avainsanat-sarakkeeseen, ja anna heidän yhteystiedot yrittäjälle viestin lopussa.
-                    6. Laita viestin sisältö content-kenttään, edustajan sähköpostiosoite recipient-kenttään ja hankkeen esimerkkiaihe subject-kenttään, 
+                    6. Lopeta viestisi, kun olet antanut valitsemasi edustajan yhteystiedot.
+                    7. Laita viestin sisältö content-kenttään, edustajan sähköpostiosoite recipient-kenttään ja hankkeen esimerkkiaihe subject-kenttään, 
                     ja tiivistä antamasi vastaus sähköpostiin sopivaksi message-kenttään, kirjoita sähköpostiviesti minä-muodossa.`         
         },
         {
           role: 'user', 
-          content: query 
+          content: query
         }
       ],
       response_format: zodResponseFormat(jsonReplyFormat, "hankeidea"),
       stream: false,
       temperature: 0.3
     });
-
-    /* const encoder = new TextEncoder();
-    const readableStream = new ReadableStream({
-      async start(controller) {
-        for await (const chunk of chatCompletionStream) {
-          controller.enqueue(encoder.encode(chunk.choices[0]?.delta?.content || ""));
-        }
-        controller.close();
-      }
-    }); */
 
   const reply = aiResponse.choices[0].message.content;
 
@@ -131,7 +156,7 @@ Deno.serve(async (req) => {
     headers: { 'Content-Type': 'application/json', ...corsHeaders },
   });
 
-  } catch (error) {
+  } catch (error: any) {
     console.log(error);
     return new Response(JSON.stringify({error: error.message}), {status: 500});
   }
