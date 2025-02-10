@@ -6,4 +6,5 @@ dist/index.html
 supabase/.temp/
 supabase/.temp/cli-latest
 supabase/.branches/
+supabase/functions/embedding
 .env
