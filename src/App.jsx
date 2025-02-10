@@ -223,7 +223,11 @@ const App = () => {
     setResponseVisibilityState(!responseVisibilityState);
   }
 
-  const handleExpertAccordion = () => {
+  const handleExpertAccordion = (event) => {
+    if (event.target.tagName == "DIV") {
+      event.stopPropagation();
+      return;
+    }
     setExpertResponseVisibilityState(!expertResponseVisibilityState);
   }
 
@@ -279,7 +283,7 @@ const App = () => {
             </div>
           </button>
           
-          <button className="accordion" onClick={handleExpertAccordion}>DEMO: Asiantuntijalle vastaus
+          <button className="accordion" onClick={(e) => handleExpertAccordion(e)}>DEMO: Asiantuntijalle vastaus
             {expertResponseVisibilityState ? <span className="accordion-open-close">-</span> : <span className="accordion-open-close">+</span>}
             <div className={`accordion-content ${expertResponseVisibilityState ? "open" : ""}`}>
               {expertResponseVisibilityState && <>{supabaseExpertResponseState}</>}
