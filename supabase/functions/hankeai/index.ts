@@ -118,13 +118,13 @@ Deno.serve(async (req) => {
     });
 
     const aiResponse = await openai.chat.completions.create({
-      model: "gpt-4o-2024-08-06",
+      model: "gpt-4o",
       messages: [
         {
           role: 'system', 
           content: `Olet avulias avustaja, jonka tehtävä on auttaa yrittäjiä kehittämään heidän ideoitaan Pohjois-Suomessa antamalla ehdotuksia ja suosituksia. 
           Käytä kontekstina: ${contextString}. Käytä rahoituslähteinä taulua ${fundingString}. Hae yhteystiedot taulusta ${contactsString}. 
-          Viestin alussa tervehdi yrittäjää. Pohdi kontekstin kautta, miten yrittäjän idea kannattaisi toteuttaa, ja soveltuuko se hankkeeksi.
+          Viestin alussa tervehdi yrittäjää, päätä viestisi ilman terveisiä. Pohdi kontekstin kautta, miten yrittäjän idea kannattaisi toteuttaa, ja soveltuuko se hankkeeksi.
           Älä koskaan anna ehdotuksena jotain, mitä yrittäjä on maininnut viestissään.
           muotoile ehdotukset seuraavalla tavalla ilman luettelomerkkejä vaihtamalla esimerkkiotsikon ehdotukseen sopivaksi:
           Laajenna palveluverkostoasi
@@ -133,7 +133,7 @@ Deno.serve(async (req) => {
           jne.
           Mainitse rahoitus ja rahoitusehdotukset vasta viestin lopussa. Viimeisenä valitse yrittäjän ideaan sopivin edustaja yhteystietotaulusta.
           Laita viestisi sisältö content-kenttään, valitsemasi edustajan sähköpostiosoite recipient-kenttään ja esimerkkiaihe hankkeelle subject-kenttään, 
-          ja tiivistä antamasi vastaus sähköpostiin sopivaksi message-kenttään, kirjoita sähköpostiviesti minä-muodossa. Päätä viestisi ilman terveisiä.`  
+          ja tiivistä antamasi vastaus sähköpostiin sopivaksi message-kenttään, kirjoita sähköpostiviesti minä-muodossa.`  
         },
         {
           role: 'user', 
