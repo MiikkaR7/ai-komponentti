@@ -9,7 +9,7 @@ module.exports = {
         new webpack.EnvironmentPlugin(['SUPABASE_URL', 'SUPABASE_ANON_KEY']),
         new HtmlWebpackPlugin({
             title: 'Hankeideatyökalu',
-            template: './src/index.html'
+            template: './src/index_prod.html'
         }),
     ],
     output: { 

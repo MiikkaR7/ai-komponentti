@@ -72,9 +72,45 @@ const App = () => {
     setSupabasePromptButtonState(
       <input className="user-prompt-form-button-disabled" value="Sparraa" disabled />
     );
-    setSupabaseResponseText("");
     setSupabaseResponseState(<div className="loading-spinner"></div>);
     setSupabaseExpertResponseState(<div className="loading-spinner"></div>);
+
+    //Response to entrepreneur
+  
+    try {
+    const { data, error } = await supabase.functions.invoke('hankeai', {
+      body: JSON.stringify({ query: userPromptState }),
+    });
+
+    if (error) {
+      throw new Error('AI response error');
+    }
+
+    //Autofill contact form based on AI response
+
+    setContactFormSubjectState(data.subject);
+    setContactFormRecipientState(data.recipient);
+    setContactFormMessageState(data.message);
+
+    //Simulate streaming by rendering the text letter by letter
+    setSupabaseResponseText("");
+    let i = -1;
+    const interval = setInterval(() => {
+      if (i < (data.content.length - 1)) {
+        setSupabaseResponseText((prev) => prev + data.content[i]);
+        i++;
+      } else {
+        clearInterval(interval);
+      }
+    }, 15);
+
+  } catch (error) {
+    setSupabaseResponseState(
+      <div className="ai-response-error">
+        <p>Error: {error.message}</p>
+      </div>
+    );
+  }
 
     //Response to AMK Specialist/Expert
   
@@ -105,43 +141,6 @@ const App = () => {
         </div>
       );
     }
-
-    //Response to entrepreneur
-  
-    try {
-      const { data, error } = await supabase.functions.invoke('hankeai', {
-        body: JSON.stringify({ query: userPromptState }),
-      });
-  
-      if (error) {
-        throw new Error('AI response error');
-      }
-
-      //Autofill contact form based on AI response
-  
-      setContactFormSubjectState(data.subject);
-      setContactFormRecipientState(data.recipient);
-      setContactFormMessageState(data.message);
-
-      //Simulate streaming by rendering the text letter by letter
-  
-      let i = -1;
-      const interval = setInterval(() => {
-        if (i < (data.content.length - 1)) {
-          setSupabaseResponseText((prev) => prev + data.content[i]);
-          i++;
-        } else {
-          clearInterval(interval);
-        }
-      }, 15);
-  
-    } catch (error) {
-      setSupabaseResponseState(
-        <div className="ai-response-error">
-          <p>Error: {error.message}</p>
-        </div>
-      );
-    }
   
     setSupabasePromptButtonState(
       <input className="user-prompt-form-button" type="submit" value="Sparraa" />
@@ -158,10 +157,10 @@ const App = () => {
 
     setModalOpenState(!modalOpenState);
 
-    const hankeaihe = formData.get('contact-form-subject');
-    const sposti = formData.get('contact-form-sender');
-    const edustaja = formData.get('contact-form-recipient');
-    const viesti = formData.get('contact-form-message');
+    const subject = formData.get('contact-form-subject');
+    const sender = formData.get('contact-form-sender');
+    const recipient = formData.get('contact-form-recipient');
+    const message = formData.get('contact-form-message');
 
       formElement.reset();
 
@@ -169,10 +168,10 @@ const App = () => {
 
           const { data, error } = await supabase.functions.invoke('sendgrid', {
           body: { 
-            aihe: hankeaihe,
-            lahettaja: sposti,
-            vastaanottaja: edustaja,
-            viesti: viesti 
+            subject: subject,
+            sender: sender,
+            recipient: recipient,
+            message: message
           }
 
       });
@@ -215,11 +214,19 @@ const App = () => {
 
   //Accordion close/open functions
 
-  const handleResponseAccordion = () => {
+  const handleResponseAccordion = (event) => {
+    if (event.target.tagName == "DIV") {
+      event.stopPropagation();
+      return;
+    }
     setResponseVisibilityState(!responseVisibilityState);
   }
 
-  const handleExpertAccordion = () => {
+  const handleExpertAccordion = (event) => {
+    if (event.target.tagName == "DIV") {
+      event.stopPropagation();
+      return;
+    }
     setExpertResponseVisibilityState(!expertResponseVisibilityState);
   }
 
@@ -267,7 +274,7 @@ const App = () => {
             {supabasePromptButtonState}
           </form>
           
-          <button className="accordion" onClick={handleResponseAccordion}>
+          <button className="accordion" onClick={(e) => handleResponseAccordion(e)}>
             Tekoälyn vastaus
             {responseVisibilityState ? <span className="accordion-open-close">-</span> : <span className="accordion-open-close">+</span>}
             <div className={`accordion-content ${responseVisibilityState ? "open" : ""}`}>
@@ -275,7 +282,7 @@ const App = () => {
             </div>
           </button>
           
-          <button className="accordion" onClick={handleExpertAccordion}>DEMO: Asiantuntijalle vastaus
+          <button className="accordion" onClick={(e) => handleExpertAccordion(e)}>DEMO: Asiantuntijalle vastaus
             {expertResponseVisibilityState ? <span className="accordion-open-close">-</span> : <span className="accordion-open-close">+</span>}
             <div className={`accordion-content ${expertResponseVisibilityState ? "open" : ""}`}>
               {expertResponseVisibilityState && <>{supabaseExpertResponseState}</>}
