@@ -96,7 +96,7 @@ Deno.serve(async (req) => {
 
     // Tietokannasta haetaan kontekstia, rahoituslähteet ja yhteystiedot.
 
-    const fetchContextFromDb = await connection.queryObject(`SELECT name, description, metainfo FROM generalinfo WHERE (metainfo LIKE '%yrittaja%')`);
+    const fetchContextFromDb = await connection.queryObject(`SELECT (description, metainfo) FROM generalinfo WHERE (metainfo LIKE '%yrittaja%')`);
     const fetchFundingFromDb = await connection.queryObject('SELECT (name, description) FROM funding');
     const fetchContactsFromDb = await connection.queryObject('SELECT (etunimi, sahkopostiosoite, avainsanat) FROM contacts');
 
@@ -125,14 +125,15 @@ Deno.serve(async (req) => {
           content: `Olet avulias avustaja, jonka tehtävä on auttaa yrittäjiä kehittämään heidän ideoitaan Pohjois-Suomessa antamalla ehdotuksia ja suosituksia. 
           Käytä kontekstina: ${contextString}. Käytä rahoituslähteinä taulua ${fundingString}. Hae yhteystiedot taulusta ${contactsString}. 
           Viestin alussa tervehdi yrittäjää. Pohdi kontekstin kautta, miten yrittäjän idea kannattaisi toteuttaa, ja soveltuuko se hankkeeksi.
+          Älä koskaan anna ehdotuksena jotain, mitä yrittäjä on maininnut viestissään.
           muotoile ehdotukset seuraavalla tavalla ilman luettelomerkkejä vaihtamalla esimerkkiotsikon ehdotukseen sopivaksi:
           Laajenna palveluverkostoasi
           Hyödynnä digitaalista markkinointia
           Hae alueellisia tukia
           jne.
-          Anna rahoitusehdotukset viestin lopussa. Viimeisenä valitse yrittäjän ideaan sopivin edustaja yhteystietotaulusta.
+          Mainitse rahoitus ja rahoitusehdotukset vasta viestin lopussa. Viimeisenä valitse yrittäjän ideaan sopivin edustaja yhteystietotaulusta.
           Laita viestisi sisältö content-kenttään, valitsemasi edustajan sähköpostiosoite recipient-kenttään ja esimerkkiaihe hankkeelle subject-kenttään, 
-          ja tiivistä antamasi vastaus sähköpostiin sopivaksi message-kenttään, kirjoita sähköpostiviesti minä-muodossa.`  
+          ja tiivistä antamasi vastaus sähköpostiin sopivaksi message-kenttään, kirjoita sähköpostiviesti minä-muodossa. Päätä viestisi ilman terveisiä.`  
         },
         {
           role: 'user', 
