@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
 
     //Query embedding
 
-    /* const embedding = await openai.embeddings.create({
+/*     const embedding = await openai.embeddings.create({
       model: "text-embedding-3-small",
       input: query,
       encoding_format: "float",
@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
 
     const queryEmbedding = embedding.data[0].embedding;
 
-    const matchThreshold = 0.33;
+    const matchThreshold = 0.1;
     const matchCount = 5;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
@@ -96,15 +96,15 @@ Deno.serve(async (req) => {
 
     // Tietokannasta haetaan kontekstia, rahoituslähteet ja yhteystiedot.
 
-    //const fetchContextFromDb = await connection.queryObject(`SELECT name, description, metainfo FROM generalinfo WHERE (metainfo LIKE '%yrittaja%')`);
+    const fetchContextFromDb = await connection.queryObject(`SELECT name, description, metainfo FROM generalinfo WHERE (metainfo LIKE '%yrittaja%')`);
     const fetchFundingFromDb = await connection.queryObject('SELECT (name, description) FROM funding');
     const fetchContactsFromDb = await connection.queryObject('SELECT (etunimi, sahkopostiosoite, avainsanat) FROM contacts');
 
-    //const context = fetchContextFromDb.rows;
+    const context = fetchContextFromDb.rows;
     const funding = fetchFundingFromDb.rows;
     const contacts = fetchContactsFromDb.rows;
 
-    //const contextString = JSON.stringify(context);
+    const contextString = JSON.stringify(context);
     const fundingString = JSON.stringify(funding);
     const contactsString = JSON.stringify(contacts);
 
@@ -122,20 +122,17 @@ Deno.serve(async (req) => {
       messages: [
         {
           role: 'system', 
-          content: `Olet avulias avustaja, jonka tehtävä on auttaa yrittäjiä kehittämään heidän hankeideoitaan Pohjois-Suomessa. Noudata alla olevia ohjeita:
-                    1. Vastauksesi alussa tervehdi yrittäjää.
-                    2. Anna yrittäjälle useita suosituksia ja parannusehdotuksia hänen ideansa toteuttamiseen, 
-                    muotoile ehdotukset seuraavalla tavalla ilman luettelomerkkejä vaihtamalla esimerkkiotsikon ehdotukseen sopivaksi:
-                    Laajenna palveluverkostoasi
-                    Hyödynnä digitaalista markkinointia
-                    Hae alueellisia tukia
-                    jne.
-                    3. Sisällytä vastaukseen aina yrittäjän hankeideaan soveltuvia rahoituslähteitä, rahoituslähteet ovat tässä taulussa: ${fundingString}.
-                    4. Ehdotusten lopuksi anna  hyvin lyhyt esimerkkiaihe hankkeelle.
-                    5. Vertaa yrittäjän antamaa hankeideaa taulun ${contactsString} edustajien avainsanat-sarakkeeseen, ja anna heidän yhteystiedot yrittäjälle viestin lopussa.
-                    6. Lopeta viestisi, kun olet antanut valitsemasi edustajan yhteystiedot.
-                    7. Laita viestin sisältö content-kenttään, edustajan sähköpostiosoite recipient-kenttään ja hankkeen esimerkkiaihe subject-kenttään, 
-                    ja tiivistä antamasi vastaus sähköpostiin sopivaksi message-kenttään, kirjoita sähköpostiviesti minä-muodossa.`         
+          content: `Olet avulias avustaja, jonka tehtävä on auttaa yrittäjiä kehittämään heidän ideoitaan Pohjois-Suomessa antamalla ehdotuksia ja suosituksia. 
+          Käytä kontekstina: ${contextString}. Käytä rahoituslähteinä taulua ${fundingString}. Hae yhteystiedot taulusta ${contactsString}. 
+          Viestin alussa tervehdi yrittäjää. Pohdi kontekstin kautta, miten yrittäjän idea kannattaisi toteuttaa, ja soveltuuko se hankkeeksi.
+          muotoile ehdotukset seuraavalla tavalla ilman luettelomerkkejä vaihtamalla esimerkkiotsikon ehdotukseen sopivaksi:
+          Laajenna palveluverkostoasi
+          Hyödynnä digitaalista markkinointia
+          Hae alueellisia tukia
+          jne.
+          Anna rahoitusehdotukset viestin lopussa. Viimeisenä valitse yrittäjän ideaan sopivin edustaja yhteystietotaulusta.
+          Laita viestisi sisältö content-kenttään, valitsemasi edustajan sähköpostiosoite recipient-kenttään ja esimerkkiaihe hankkeelle subject-kenttään, 
+          ja tiivistä antamasi vastaus sähköpostiin sopivaksi message-kenttään, kirjoita sähköpostiviesti minä-muodossa.`  
         },
         {
           role: 'user', 

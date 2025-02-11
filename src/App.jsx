@@ -72,7 +72,6 @@ const App = () => {
     setSupabasePromptButtonState(
       <input className="user-prompt-form-button-disabled" value="Sparraa" disabled />
     );
-    setSupabaseResponseText("");
     setSupabaseResponseState(<div className="loading-spinner"></div>);
     setSupabaseExpertResponseState(<div className="loading-spinner"></div>);
 
@@ -94,7 +93,7 @@ const App = () => {
     setContactFormMessageState(data.message);
 
     //Simulate streaming by rendering the text letter by letter
-
+    setSupabaseResponseText("");
     let i = -1;
     const interval = setInterval(() => {
       if (i < (data.content.length - 1)) {

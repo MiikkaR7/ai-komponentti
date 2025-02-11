@@ -7,4 +7,5 @@ supabase/.temp/
 supabase/.temp/cli-latest
 supabase/.branches/
 supabase/functions/embedding
+supabase/functions/hankeai-dev
 .env
