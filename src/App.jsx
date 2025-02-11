@@ -157,10 +157,10 @@ const App = () => {
 
     setModalOpenState(!modalOpenState);
 
-    const hankeaihe = formData.get('contact-form-subject');
-    const sposti = formData.get('contact-form-sender');
-    const edustaja = formData.get('contact-form-recipient');
-    const viesti = formData.get('contact-form-message');
+    const subject = formData.get('contact-form-subject');
+    const sender = formData.get('contact-form-sender');
+    const recipient = formData.get('contact-form-recipient');
+    const message = formData.get('contact-form-message');
 
       formElement.reset();
 
@@ -168,10 +168,10 @@ const App = () => {
 
           const { data, error } = await supabase.functions.invoke('sendgrid', {
           body: { 
-            aihe: hankeaihe,
-            lahettaja: sposti,
-            vastaanottaja: edustaja,
-            viesti: viesti 
+            subject: subject,
+            sender: sender,
+            recipient: recipient,
+            message: message
           }
 
       });
