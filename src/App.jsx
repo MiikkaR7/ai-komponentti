@@ -1,10 +1,8 @@
-import { createClient } from '@supabase/supabase-js';
 import { useState, useRef, useEffect } from 'react';
+import { supabase } from './supabase.js';
 import './App.css';
 
 const App = () => {
-
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_ANON_KEY);
 
   //States for responses and buttons in application flow
 
@@ -233,7 +231,7 @@ const App = () => {
   const handleContactFormAccordion = (event) => {
 
     // Dont trigger function if trying to use the contact form
-    if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA" || event.target.tagName === "SELECT" || event.target.tagName === "SPAN") {
+    if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA" || event.target.tagName === "SELECT") {
       event.stopPropagation();
       return;
     }
