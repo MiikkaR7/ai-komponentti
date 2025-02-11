@@ -79,7 +79,7 @@ const App = () => {
     //Response to entrepreneur
   
     try {
-    const { data, error } = await supabase.functions.invoke('hankeai', {
+    const { data, error } = await supabase.functions.invoke('hankeai-dev', {
       body: JSON.stringify({ query: userPromptState }),
     });
 
