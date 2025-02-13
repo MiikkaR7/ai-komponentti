@@ -108,7 +108,7 @@ Deno.serve(async (req) => {
       console.log("Rate limit expired, resetting")
       const { data, error } = await supabase
       .from('ratelimit_hankeai')
-      .update({ requests: 0, reset_at: new Date().toISOString().split('.')[0] + "+00:00", resets: resets + 1})
+      .update({ requests: 1, reset_at: new Date().toISOString().split('.')[0] + "+00:00", resets: resets + 1})
       .eq('id', 1)
 
       if (error) {
