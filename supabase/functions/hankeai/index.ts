@@ -6,6 +6,7 @@ import { Redis } from "https://esm.sh/@upstash/redis@1.34.3";
 import { zodResponseFormat } from 'https://deno.land/x/openai@v4.55.1/helpers/zod.ts';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import z from "npm:zod@^3.24.1";
+import { time } from "node:console";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -18,12 +19,13 @@ const corsHeaders = {
 };
 
 // Tietokantayhteys
-const databaseUrl = Deno.env.get('SUPABASE_DB_URL');
+const databaseUrl = Deno.env.get('SUPABASE_DB_URL')!;
 const pool = new postgres.Pool(databaseUrl, 100, true);
 const connection = await pool.connect();
 
-const supabaseUrl = Deno.env.get('SUPABASE_URL') ?? '';
-const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY') ?? '';
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
+const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
 Deno.serve(async (req) => {
 
@@ -76,7 +78,56 @@ Deno.serve(async (req) => {
 
     //Rate limit
 
-    const redis = new Redis({
+    const supabase = createClient(supabaseUrl, serviceRoleKey);
+    const { data: fetchData, error: fetchError } = await supabase.from('ratelimit_hankeai').select(`reset_at, requests, resets`);
+
+    if (fetchError) {
+      throw new Error(fetchError.message);
+    }
+
+    //Get current amount of requests, resets and last reset time from db
+    const requests = fetchData![0].requests;
+    const resets = fetchData![0].resets;
+
+
+    //Rate limit is 100 requests in 24 hours
+    if (requests > 100) {
+      throw new Error("Rate limit exceeded");
+    }
+
+    const resetAt = fetchData![0].reset_at;
+    const resetAtDate = new Date(resetAt);
+    const currentTime = Date.now();
+
+
+
+    //Calculate time difference between last reset than now, reset the time if 24 hours have passed
+    const timeDifference = currentTime - resetAtDate.getTime();
+
+    if (timeDifference > 86400000) {
+      console.log("Rate limit expired, resetting")
+      const { data, error } = await supabase
+      .from('ratelimit_hankeai')
+      .update({ requests: 0, reset_at: new Date().toISOString().split('.')[0] + "+00:00", resets: resets + 1})
+      .eq('id', 1)
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+    } else {
+      const { data, error } = await supabase
+      .from('ratelimit_hankeai')
+      .update({ requests: requests + 1})
+      .eq('id', 1)
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+    }
+
+    /* const redis = new Redis({
       url: Deno.env.get('UPSTASH_REDIS_REST_URL')!,
       token: Deno.env.get('UPSTASH_REDIS_REST_TOKEN')!,
     });
@@ -92,7 +143,7 @@ Deno.serve(async (req) => {
     
     if (!success) {
       throw new Error('Limit exceeded');
-    }
+    } */
 
     // Tietokannasta haetaan kontekstia, rahoituslähteet ja yhteystiedot.
 
