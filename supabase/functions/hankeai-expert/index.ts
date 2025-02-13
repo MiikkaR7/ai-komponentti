@@ -60,8 +60,8 @@ Deno.serve(async (req) => {
 
     // Tietokannasta haetaan kontekstia ja rahoituslähteet.
 
-    const fetchContextFromDb = await connection.queryObject(`SELECT (name, description, metainfo) FROM generalinfo WHERE (metainfo LIKE '%amk%')`);
-    const fetchFundingFromDb = await connection.queryObject('SELECT (name, description) FROM funding');
+    const fetchContextFromDb = await connection.queryObject('SELECT data FROM generalinfo_json');
+    const fetchFundingFromDb = await connection.queryObject('SELECT name, description FROM funding');
 
     const context = fetchContextFromDb.rows;
     const funding = fetchFundingFromDb.rows;
@@ -76,14 +76,13 @@ Deno.serve(async (req) => {
       messages: [
         {
           role: 'system', 
-          content: `Olet avustaja, jonka tehtävä on auttaa Lapin AMK:n hankevalmistelijoita, vastaanottamalla yrittäjän hankeidea ja laatimalla siitä hankevalmistelijalle viesti.
+          content: `Rajoita vastauksesi noin 15 virkkeeseen. Olet avustaja, jonka tehtävä on auttaa Lapin AMK:n hankevalmistelijoita, vastaanottamalla yrittäjän hankeidea ja laatimalla siitä hankevalmistelijalle viesti.
                     Käytä kontekstina ${contextString}. Noudata alla olevia ohjeita:
-                    1. Älä käytä Markdown-muotoilua listassa, eli *-merkkiä.
-                    2. Rajoita vastauksesi noin 1200 merkkiin.
-                    3. Tee johtopäätös siitä, soveltuuko idea paremmin opiskelijayhteistyöksi vai hankkeeksi käyttämällä kontekstia.
-                    4. Jos idea soveltuu hankkeeksi, päätä onko hanke tutkimus- vai aluekehityspainotteinen.
-                    5. Anna hankevalmistelijalle näkökulmia ja toteutustapoja vastaanotettuun ideaan.
-                    7. Ehdota hankevalmistelijalle myös rahoituslähteitä hankeidealle, rahoituslähteet ovat tässä taulukossa: ${fundingString}.`
+                    1. Älä käytä Markdown-muotoilua ehdotuksissa.
+                    2. Tee johtopäätös siitä, soveltuuko idea paremmin opiskelijayhteistyöksi vai hankkeeksi käyttämällä kontekstia.
+                    3. Jos idea soveltuu hankkeeksi, päätä onko hanke tutkimus- vai aluekehityspainotteinen.
+                    4. Anna hankevalmistelijalle näkökulmia ja toteutustapoja vastaanotettuun ideaan.
+                    5. Ehdota hankevalmistelijalle myös rahoituslähteitä hankeidealle, rahoituslähteet ovat tässä taulukossa: ${fundingString}.`
         },
         {
           role: 'user', 
