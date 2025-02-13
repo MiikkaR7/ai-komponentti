@@ -46,7 +46,7 @@ Deno.serve(async (req) => {
 
     //Query embedding
 
-/*     const embedding = await openai.embeddings.create({
+    /* const embedding = await openai.embeddings.create({
       model: "text-embedding-3-small",
       input: query,
       encoding_format: "float",
@@ -56,8 +56,8 @@ Deno.serve(async (req) => {
 
     const queryEmbedding = embedding.data[0].embedding;
 
-    const matchThreshold = 0.1;
-    const matchCount = 5;
+    const matchThreshold = 0;
+    const matchCount = 3;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
     const { data , error } = await supabase
@@ -96,9 +96,9 @@ Deno.serve(async (req) => {
 
     // Tietokannasta haetaan kontekstia, rahoituslähteet ja yhteystiedot.
 
-    const fetchContextFromDb = await connection.queryObject(`SELECT (description, metainfo) FROM generalinfo WHERE (metainfo LIKE '%yrittaja%')`);
-    const fetchFundingFromDb = await connection.queryObject('SELECT (name, description) FROM funding');
-    const fetchContactsFromDb = await connection.queryObject('SELECT (etunimi, sahkopostiosoite, avainsanat) FROM contacts');
+    const fetchContextFromDb = await connection.queryObject('SELECT data FROM generalinfo_json');
+    const fetchFundingFromDb = await connection.queryObject('SELECT name, description FROM funding');
+    const fetchContactsFromDb = await connection.queryObject('SELECT etunimi, sahkopostiosoite, avainsanat FROM contacts');
 
     const context = fetchContextFromDb.rows;
     const funding = fetchFundingFromDb.rows;
@@ -122,18 +122,25 @@ Deno.serve(async (req) => {
       messages: [
         {
           role: 'system', 
-          content: `Olet avulias avustaja, jonka tehtävä on auttaa yrittäjiä kehittämään heidän ideoitaan Pohjois-Suomessa antamalla ehdotuksia ja suosituksia. 
-          Käytä kontekstina: ${contextString}. Käytä rahoituslähteinä taulua ${fundingString}. Hae yhteystiedot taulusta ${contactsString}. 
-          Viestin alussa tervehdi yrittäjää, päätä viestisi ilman terveisiä. Pohdi kontekstin kautta, miten yrittäjän idea kannattaisi toteuttaa, ja soveltuuko se hankkeeksi.
-          Älä koskaan anna ehdotuksena jotain, mitä yrittäjä on maininnut viestissään.
-          muotoile ehdotukset seuraavalla tavalla ilman luettelomerkkejä vaihtamalla esimerkkiotsikon ehdotukseen sopivaksi:
-          Laajenna palveluverkostoasi
-          Hyödynnä digitaalista markkinointia
-          Hae alueellisia tukia
-          jne.
-          Mainitse rahoitus ja rahoitusehdotukset vasta viestin lopussa. Viimeisenä valitse yrittäjän ideaan sopivin edustaja yhteystietotaulusta.
-          Laita viestisi sisältö content-kenttään, valitsemasi edustajan sähköpostiosoite recipient-kenttään ja esimerkkiaihe hankkeelle subject-kenttään, 
-          ja tiivistä antamasi vastaus sähköpostiin sopivaksi message-kenttään, kirjoita sähköpostiviesti minä-muodossa.`  
+          content: 
+          `Rajoita vastauksesi noin 15 virkkeeseen. Olet avulias avustaja, jonka tehtävä on auttaa yrittäjiä kehittämään heidän hankeideoitaan.
+                    Käytä kontekstina ${contextString}. Rahoituslähteet ovat taulukossa: ${fundingString}. Edustajien yhteystiedot ovat taulussa: ${contactsString}.
+                    Päättele kontekstin avulla, soveltuuko idea hankkeeksi ja miten se voitaisiin toteuttaa hyödyntämällä AMK:n resursseja. 
+                    Noudata viestissäsi alla olevia ohjeita:
+                    1. Viestin alussa tervehdi yrittäjää, ja lopuksi anna terveiset nimimerkillä Lapin AMK.
+                    2. Muotoile ehdotukset ja rahoituslähteet seuraavalla tavalla ilman luettelomerkkejä vaihtamalla esimerkkiotsikon ehdotukseen sopivaksi tai rahoituslähteen nimeksi:
+                        Laajenna palveluverkostoasi
+                        Hyödynnä digitaalista markkinointia
+                        Hae alueellisia tukia
+                        jne.
+                    3. Anna yrittäjälle käytännön ehdotuksia vastaanotetun idean toteuttamiseen, älä ikinä anna ehdotusta, jonka yrittäjä on jo maininnut viestissään.
+                    4. Ehdota myös vähintään kolmea rahoituslähdettä hankeidealle käyttäen rahoituslähdetaulua, anna rahoitusehdotukset aina viimeisenä.
+                    5. Valitse yhteystiedoista hankeideaan parhaiten soveltuva edustaja, ja anna hänen nimi ja sähköpostiosoite yrittäjälle.
+                    ---
+                    Laita viestisi sisältö content-kenttään, valitsemasi edustajan sähköpostiosoite recipient-kenttään ja esimerkkiaihe hankkeelle subject-kenttään. 
+                    Tiivistä antamasi vastaus sähköpostiin sopivaksi message-kenttään, kirjoita sähköpostiviesti niin, että yrittäjä olisi kirjoittanut sen.`
+                    
+                      
         },
         {
           role: 'user', 
@@ -142,7 +149,6 @@ Deno.serve(async (req) => {
       ],
       response_format: zodResponseFormat(jsonReplyFormat, "hankeidea"),
       stream: false,
-      temperature: 0.3
     });
 
   const reply = aiResponse.choices[0].message.content;
