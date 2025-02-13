@@ -97,7 +97,7 @@ Deno.serve(async (req) => {
     // Tietokannasta haetaan kontekstia, rahoituslähteet ja yhteystiedot.
 
     const fetchContextFromDb = await connection.queryObject('SELECT data FROM generalinfo_json');
-    const fetchFundingFromDb = await connection.queryObject('SELECT name, description FROM funding');
+    const fetchFundingFromDb = await connection.queryObject('SELECT data FROM funding_json');
     const fetchContactsFromDb = await connection.queryObject('SELECT etunimi, sahkopostiosoite, avainsanat FROM contacts');
 
     const context = fetchContextFromDb.rows;
