@@ -79,6 +79,8 @@ Deno.serve(async (req) => {
     const rateLimit = 100;
     const resetTreshold = 86400000;
 
+    //86400000
+
     //Get current amount of requests, resets and last reset time from db
     const requests = fetchData![0].requests;
     const resets = fetchData![0].resets;
@@ -90,22 +92,34 @@ Deno.serve(async (req) => {
     const timeDifference = currentTime - resetAtDate.getTime();
 
     if (timeDifference > resetTreshold) {
+
       console.log("Rate limit expired, resetting")
-      const { error } = await supabase
+      const { error: timeError } = await supabase
       .from('ratelimit_hankeai')
-      .update({ requests: 1, reset_at: new Date().toISOString().split('.')[0] + "+00:00", resets: resets + 1})
+      .update({reset_at: new Date().toISOString().split('.')[0] + "+00:00"})
       .eq('id', 1)
 
-      if (error) {
-        throw new Error(error.message);
+      const { error: requestsError } = await supabase
+      .from('ratelimit_hankeai')
+      .update({requests: 1})
+      .eq('id', 1)
+
+      const { error: resetError } = await supabase
+      .from('ratelimit_hankeai')
+      .update({resets: resets + 1})
+      .eq('id', 1)
+
+      if (timeError || requestsError || resetError) {
+        throw new Error("Error resetting rate limit");
       }
 
-    }
+    } else if (requests >= rateLimit) {
 
-    //Rate limit is 100 requests in 24 hours
-    if (requests > rateLimit) {
+      //Rate limit is 100 requests in 24 hours
       throw new Error("Rate limit exceeded");
+
     } else {
+
       const { error } = await supabase
       .from('ratelimit_hankeai')
       .update({ requests: requests + 1})
@@ -114,9 +128,8 @@ Deno.serve(async (req) => {
       if (error) {
         throw new Error(error.message);
       }
-    }
 
-    
+    }
 
     /* const redis = new Redis({
       url: Deno.env.get('UPSTASH_REDIS_REST_URL')!,
