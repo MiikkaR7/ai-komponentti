@@ -1,43 +1,35 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import * as postgres from 'https://deno.land/x/postgres@v0.17.0/mod.ts';
 import OpenAI from 'https://deno.land/x/openai@v4.24.0/mod.ts'
-import { Ratelimit } from "https://cdn.skypack.dev/@upstash/ratelimit@latest";
-import { Redis } from "https://esm.sh/@upstash/redis@1.34.3";
 import { zodResponseFormat } from 'https://deno.land/x/openai@v4.55.1/helpers/zod.ts';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import z from "npm:zod@^3.24.1";
-import { time } from "node:console";
+//import { Ratelimit } from "https://cdn.skypack.dev/@upstash/ratelimit@latest";
+//import { Redis } from "https://esm.sh/@upstash/redis@1.34.3";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, api_key, content-type',
 };
 
-
-(BigInt.prototype as any).toJSON = function () {
-  return this.toString();
-};
-
-// Tietokantayhteys
-const databaseUrl = Deno.env.get('SUPABASE_DB_URL')!;
-const pool = new postgres.Pool(databaseUrl, 100, true);
-const connection = await pool.connect();
+//Supabase-yhteys
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
+//const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
 const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
 Deno.serve(async (req) => {
+
+  //Preflight request
 
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
-  // Käyttäjän syöte
+  //User input
 
   const { query } = await req.json();
 
-  // openAI-yhteys
+  //openAI connection
 
   const apiKey = Deno.env.get('OPENAI_API_KEY');
   const openai = new OpenAI({
@@ -71,15 +63,13 @@ Deno.serve(async (req) => {
 
     if (error) {
       throw new Error('Error finding matching embeddings from Supabase: ' + error.message);
-    }
-
-    console.log("Match data: " + JSON.stringify(data, null, 2)); */
+    }*/
 
 
     //Rate limit
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
-    const { data: fetchData, error: fetchError } = await supabase.from('ratelimit_hankeai').select(`reset_at, requests, resets`);
+    const { data: fetchData, error: fetchError } = await supabase.from('ratelimit_hankeai').select('reset_at, requests, resets');
 
     if (fetchError) {
       throw new Error(fetchError.message);
@@ -148,17 +138,17 @@ Deno.serve(async (req) => {
 
     // Tietokannasta haetaan kontekstia, rahoituslähteet ja yhteystiedot.
 
-    const fetchContextFromDb = await connection.queryObject('SELECT data FROM generalinfo_json');
-    const fetchFundingFromDb = await connection.queryObject('SELECT data FROM funding_json');
-    const fetchContactsFromDb = await connection.queryObject('SELECT etunimi, sahkopostiosoite, avainsanat FROM contacts');
+    const {data: contextDbTable, error: contextError} = await supabase.from('generalinfo_json').select('data');
+    const {data: fundingDbTable, error: fundingError} = await supabase.from('funding_json').select('data');
+    const {data: contactsDbTable, error: contactsError} = await supabase.from('contacts').select('etunimi, sahkopostiosoite, avainsanat');
 
-    const context = fetchContextFromDb.rows;
-    const funding = fetchFundingFromDb.rows;
-    const contacts = fetchContactsFromDb.rows;
+    if (contextError || fundingError || contactsError) {
+      throw new Error("Error getting prompt context");
+    }
 
-    const contextString = JSON.stringify(context);
-    const fundingString = JSON.stringify(funding);
-    const contactsString = JSON.stringify(contacts);
+    const contextString = JSON.stringify(contextDbTable);
+    const fundingString = JSON.stringify(fundingDbTable);
+    const contactsString = JSON.stringify(contactsDbTable);
 
     //Tekoälylle tehtävä pyyntö
 
@@ -180,14 +170,10 @@ Deno.serve(async (req) => {
                     Päättele kontekstin avulla, soveltuuko idea hankkeeksi ja miten se voitaisiin toteuttaa hyödyntämällä AMK:n resursseja. 
                     Noudata viestissäsi alla olevia ohjeita:
                     1. Viestin alussa tervehdi yrittäjää, ja lopuksi anna terveiset nimimerkillä Lapin AMK.
-                    2. Muotoile ehdotukset ja rahoituslähteet seuraavalla tavalla ilman luettelomerkkejä vaihtamalla esimerkkiotsikon ehdotukseen sopivaksi tai rahoituslähteen nimeksi:
-                        Laajenna palveluverkostoasi
-                        Hyödynnä digitaalista markkinointia
-                        Hae alueellisia tukia
-                        jne.
+                    2. Muotoile ehdotukset ja rahoitusehdotukset ilman luettelomerkkejä.
                     3. Anna yrittäjälle käytännön ehdotuksia vastaanotetun idean toteuttamiseen, älä ikinä anna ehdotusta, jonka yrittäjä on jo maininnut viestissään.
                     4. Ehdota myös vähintään kolmea rahoituslähdettä hankeidealle käyttäen rahoituslähdetaulua, anna rahoitusehdotukset aina viimeisenä.
-                    5. Valitse yhteystiedoista hankeideaan parhaiten soveltuva edustaja, ja anna hänen nimi ja sähköpostiosoite yrittäjälle.
+                    5. Valitse yhteystiedoista hankeideaan parhaiten soveltuva edustaja, ja anna hänen yhteystietonsa yrittäjälle.
                     ---
                     Laita viestisi sisältö content-kenttään, valitsemasi edustajan sähköpostiosoite recipient-kenttään ja esimerkkiaihe hankkeelle subject-kenttään. 
                     Tiivistä antamasi vastaus sähköpostiin sopivaksi message-kenttään, kirjoita sähköpostiviesti niin, että yrittäjä olisi kirjoittanut sen.`
