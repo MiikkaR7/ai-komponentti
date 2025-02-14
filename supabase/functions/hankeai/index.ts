@@ -79,8 +79,6 @@ Deno.serve(async (req) => {
     const rateLimit = 100;
     const resetTreshold = 86400000;
 
-    //86400000
-
     //Get current amount of requests, resets and last reset time from db
     const requests = fetchData![0].requests;
     const resets = fetchData![0].resets;
