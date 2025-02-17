@@ -7,7 +7,7 @@ const App = () => {
   //States for responses and buttons in application flow
 
   const [contactFormVisibilityState, setContactFormVisibilityState] = useState(true);
-  const [supabaseResponseText, setSupabaseResponseText] = useState("");
+  const [supabaseResponseText, setSupabaseResponseText] = useState("Lähetä hankeideasi, jotta saat vastauksen!");
   const [supabaseResponseState, setSupabaseResponseState] = useState("");
   const [supabaseExpertResponseState, setSupabaseExpertResponseState] = useState("");
   const [supabasePromptButtonState, setSupabasePromptButtonState] = useState(<input className="user-prompt-form-button" type="submit" value="Sparraa" />);
@@ -22,7 +22,7 @@ const App = () => {
       supabaseResponseRef.current.scrollTop = supabaseResponseRef.current.scrollHeight;
     };
   }, [supabaseResponseText]);
-  
+
 
   //Accordions
 
@@ -74,64 +74,57 @@ const App = () => {
     setSupabaseExpertResponseState(<div className="loading-spinner"></div>);
 
     //Response to entrepreneur
-  
-    try {
-    const { data, error } = await supabase.functions.invoke('hankeai', {
-      body: JSON.stringify({ query: userPromptState }),
-    });
 
-    if (error) {
-      throw new Error('AI response error');
+    try {
+      const { data, error } = await supabase.functions.invoke('hankeai', {
+        body: JSON.stringify({ query: userPromptState }),
+      });
+
+      if (error) {
+        throw new Error('AI response error');
+      }
+
+      //Autofill contact form based on AI response
+
+      setContactFormSubjectState(data.subject);
+      setContactFormRecipientState(data.recipient);
+      setContactFormMessageState(data.message);
+
+      //Simulate streaming by rendering the text letter by letter
+      setSupabaseResponseText("");
+      let i = -1;
+      const interval = setInterval(() => {
+        if (i < (data.content.length - 1)) {
+          setSupabaseResponseText((prev) => prev + data.content[i]);
+          i++;
+        } else {
+          clearInterval(interval);
+        }
+      }, 15);
+
+    } catch (error) {
+      setSupabaseResponseState(
+        <div className="ai-response-error">
+          <p>Error: {error.message}</p>
+        </div>
+      );
     }
 
-    //Autofill contact form based on AI response
-
-    setContactFormSubjectState(data.subject);
-    setContactFormRecipientState(data.recipient);
-    setContactFormMessageState(data.message);
-
-    //Simulate streaming by rendering the text letter by letter
-    setSupabaseResponseText("");
-    let i = -1;
-    const interval = setInterval(() => {
-      if (i < (data.content.length - 1)) {
-        setSupabaseResponseText((prev) => prev + data.content[i]);
-        i++;
-      } else {
-        clearInterval(interval);
-      }
-    }, 15);
-
-  } catch (error) {
-    setSupabaseResponseState(
-      <div className="ai-response-error">
-        <p>Error: {error.message}</p>
-      </div>
-    );
-  }
-
     //Response to AMK Specialist/Expert
-  
+
     try {
-      const { data, error } = await supabase.functions.invoke(
-        'hankeai-expert',
-        {
-          body: JSON.stringify({ query: userPromptState }),
-        }
-      );
-  
+      const { data, error } = await supabase.functions.invoke('hankeai-expert', {
+        body: JSON.stringify({ query: userPromptState }),
+      });
+
       if (error) {
         throw new Error('Expert response error');
       }
-  
+
       setSupabaseExpertResponseState(
-        <div className="ai-response">
-          {data.reply.split('\n').map((line, index) => (
-            <p key={index}>{line}</p>
-          ))}
-        </div>
+        <div className="ai-response">{data.reply}</div>
       );
-  
+
     } catch (error) {
       setSupabaseExpertResponseState(
         <div className="ai-response-error">
@@ -139,13 +132,13 @@ const App = () => {
         </div>
       );
     }
-  
+
     setSupabasePromptButtonState(
       <input className="user-prompt-form-button" type="submit" value="Sparraa" />
     );
     setContactFormVisibilityState(true);
   };
-  
+
 
   //Contact form function
 
@@ -160,25 +153,29 @@ const App = () => {
     const recipient = formData.get('contact-form-recipient');
     const message = formData.get('contact-form-message');
 
-      formElement.reset();
+    formElement.reset();
 
-      try {
+    try {
 
-          const { data, error } = await supabase.functions.invoke('sendgrid', {
-          body: { 
-            subject: subject,
-            sender: sender,
-            recipient: recipient,
-            message: message
-          }
+      const { error } = await supabase.functions.invoke('sendgrid', {
+        body: {
+          subject: subject,
+          sender: sender,
+          recipient: recipient,
+          message: message
+        }
 
       });
-        
-      } catch (error) {
-        
-        console.log(error);
 
+      if (error) {
+        throw new Error('Error sending email');
       }
+
+    } catch (error) {
+
+      console.log(error);
+
+    }
 
   }
 
@@ -213,7 +210,7 @@ const App = () => {
   //Accordion close/open functions
 
   const handleResponseAccordion = (event) => {
-    if (event.target.tagName == "DIV") {
+    if (event.target.className == "ai-response") {
       event.stopPropagation();
       return;
     }
@@ -221,7 +218,7 @@ const App = () => {
   }
 
   const handleExpertAccordion = (event) => {
-    if (event.target.tagName == "DIV") {
+    if (event.target.className == "ai-response") {
       event.stopPropagation();
       return;
     }
@@ -230,8 +227,8 @@ const App = () => {
 
   const handleContactFormAccordion = (event) => {
 
-    // Dont trigger function if trying to use the contact form
-    if (event.target.tagName === "INPUT" || event.target.tagName === "TEXTAREA" || event.target.tagName === "SELECT") {
+    // Dont trigger accordion if trying to use the contact form
+    if (event.target.tagName == "INPUT" || event.target.tagName == "TEXTAREA" || event.target.tagName == "SELECT" || event.target.tagName == "DIV") {
       event.stopPropagation();
       return;
     }
@@ -241,20 +238,20 @@ const App = () => {
   return (
     <>
       {modalOpenState ? (
-          <div className="user-continue-prompt">
-            <div>
-              <p className="user-continue-prompt-header">Kiitti!</p>
-              <p className="user-continue-prompt-message">Jatka sparraamista samalla idealla?</p>
-            </div>
-            <div className="user-continue-prompt-buttons">
-              <button onClick={handleContinue} className="prompt-form-button">
-                Jatka samalla
-              </button>
-              <button onClick={handleNewUserInput} className="prompt-form-button-reverse">
-                Uusi idea
-              </button>
-            </div>
+        <div className="user-continue-prompt">
+          <div>
+            <p className="user-continue-prompt-header">Kiitti!</p>
+            <p className="user-continue-prompt-message">Jatka sparraamista samalla idealla?</p>
           </div>
+          <div className="user-continue-prompt-buttons">
+            <button onClick={handleContinue} className="prompt-form-button">
+              Jatka samalla
+            </button>
+            <button onClick={handleNewUserInput} className="prompt-form-button-reverse">
+              Uusi idea
+            </button>
+          </div>
+        </div>
       ) : (
         <div className="ai-komponentti">
           <h1 className="komponentti-header">Hankeideatyökalu</h1>
@@ -271,7 +268,7 @@ const App = () => {
             />
             {supabasePromptButtonState}
           </form>
-          
+
           <button className="accordion" onClick={(e) => handleResponseAccordion(e)}>
             Tekoälyn vastaus
             {responseVisibilityState ? <span className="accordion-open-close">-</span> : <span className="accordion-open-close">+</span>}
@@ -279,8 +276,9 @@ const App = () => {
               {responseVisibilityState && <>{supabaseResponseState}</>}
             </div>
           </button>
-          
-          <button className="accordion" onClick={(e) => handleExpertAccordion(e)}>DEMO: Asiantuntijalle vastaus
+
+          <button className="accordion" onClick={(e) => handleExpertAccordion(e)}>
+            DEMO: Asiantuntijalle vastaus
             {expertResponseVisibilityState ? <span className="accordion-open-close">-</span> : <span className="accordion-open-close">+</span>}
             <div className={`accordion-content ${expertResponseVisibilityState ? "open" : ""}`}>
               {expertResponseVisibilityState && <>{supabaseExpertResponseState}</>}
@@ -304,10 +302,10 @@ const App = () => {
                     <div className="contact-form-inputs">
                       <input
                         value={contactFormNameState}
-                        onChange={handleContactFormNameInput} 
+                        onChange={handleContactFormNameInput}
                         name="contact-form-name"
                         className="contact-form-inputs-input"
-                        placeholder="Nimi" 
+                        placeholder="Nimi"
                         required
                       />
                       <input
@@ -321,7 +319,7 @@ const App = () => {
                       />
                       <input
                         value={contactFormSubjectState}
-                        onChange={handleContactFormSubjectInput} 
+                        onChange={handleContactFormSubjectInput}
                         name="contact-form-subject"
                         className="contact-form-inputs-input"
                         placeholder="Hankeidea"
@@ -329,8 +327,8 @@ const App = () => {
                       />
                       <select
                         value={contactFormRecipientState}
-                        onChange={handleContactFormRecipientInput} 
-                        name="contact-form-recipient" 
+                        onChange={handleContactFormRecipientInput}
+                        name="contact-form-recipient"
                         className="contact-form-select"
                       >
                         <option value="miikka@testi.fi">miikka@testi.fi</option>
@@ -361,7 +359,7 @@ const App = () => {
     </>
   );
 
-  
+
 
 }
 
