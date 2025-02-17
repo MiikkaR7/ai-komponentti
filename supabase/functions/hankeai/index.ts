@@ -1,20 +1,16 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import OpenAI from 'https://deno.land/x/openai@v4.24.0/mod.ts'
-import { zodResponseFormat } from 'https://deno.land/x/openai@v4.55.1/helpers/zod.ts';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
-import z from "npm:zod@^3.24.1";
-//import { Ratelimit } from "https://cdn.skypack.dev/@upstash/ratelimit@latest";
-//import { Redis } from "https://esm.sh/@upstash/redis@1.34.3";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, api_key, content-type',
 };
 
-//Supabase-yhteys
+//Supabase connection
+//Can use service role key since edge function is not exposed to user/browser, only invoked with anon key from browser
 
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-//const supabaseKey = Deno.env.get('SUPABASE_ANON_KEY')!;
 const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
 Deno.serve(async (req) => {
@@ -38,35 +34,8 @@ Deno.serve(async (req) => {
 
   try {
 
-    //Query embedding
-
-    /* const embedding = await openai.embeddings.create({
-      model: "text-embedding-3-small",
-      input: query,
-      encoding_format: "float",
-
-      
-    });
-
-    const queryEmbedding = embedding.data[0].embedding;
-
-    const matchThreshold = 0;
-    const matchCount = 3;
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    const { data , error } = await supabase
-      .rpc('match_funding', {
-        query_embedding: queryEmbedding,
-        match_threshold: matchThreshold,
-        match_count: matchCount
-      });
-
-    if (error) {
-      throw new Error('Error finding matching embeddings from Supabase: ' + error.message);
-    }*/
-
-
-    //Rate limit
+    //Rate limit using database table ratelimit_hankeai
+    //Get table data
 
     const supabase = createClient(supabaseUrl, serviceRoleKey);
     const { data: fetchData, error: fetchError } = await supabase.from('ratelimit_hankeai').select('reset_at, requests, resets');
@@ -79,16 +48,18 @@ Deno.serve(async (req) => {
     const rateLimit = 100;
     const resetTreshold = 86400000;
 
-    //Get current amount of requests, resets and last reset time from db
+    //Get current amount of requests, resets and last reset time from table ratelimit_hankeai
     const requests = fetchData![0].requests;
     const resets = fetchData![0].resets;
     const resetAt = fetchData![0].reset_at;
+    //Convert reset time timestamptz to Date and get current time
     const resetAtDate = new Date(resetAt);
     const currentTime = Date.now();
 
     //Calculate time difference between last reset than now, reset the time if 24 hours have passed
     const timeDifference = currentTime - resetAtDate.getTime();
 
+    //Rate limit logic, first check if more than 24 hours have passed since last reset, then enforce rate limit, after that allow request
     if (timeDifference > resetTreshold) {
 
       console.log("Rate limit expired, resetting")
@@ -129,46 +100,28 @@ Deno.serve(async (req) => {
 
     }
 
-    /* const redis = new Redis({
-      url: Deno.env.get('UPSTASH_REDIS_REST_URL')!,
-      token: Deno.env.get('UPSTASH_REDIS_REST_TOKEN')!,
-    });
-    
-    const rateLimit = new Ratelimit({
-      redis,
-      limiter: Ratelimit.slidingWindow(100, '42300 s'),
-      analytics: true,
-    });
-    
-    const identifier = 'openAI-limit';
-    const { success } = await rateLimit.limit(identifier);
-    
-    if (!success) {
-      throw new Error('Limit exceeded');
-    } */
-
-    // Tietokannasta haetaan kontekstia, rahoituslähteet ja yhteystiedot.
+    // Get context, funding sources and contacts from db
+    // Create JSON object with openAI response(content), AMK-expert(recipient), example subject(subject) and summarized email(message)
 
     const {data: contextDbTable, error: contextError} = await supabase.from('generalinfo_json').select('data');
     const {data: fundingDbTable, error: fundingError} = await supabase.from('funding_json').select('data');
     const {data: contactsDbTable, error: contactsError} = await supabase.from('contacts').select('etunimi, sahkopostiosoite, avainsanat');
 
-    if (contextError || fundingError || contactsError) {
-      throw new Error("Error getting prompt context");
+    if (contextError) {
+      throw new Error(contextError.message);
+    }
+    if (fundingError) {
+      throw new Error(fundingError.message);
+    }
+    if (contactsError) {
+      throw new Error(contactsError.message);
     }
 
     const contextString = JSON.stringify(contextDbTable);
     const fundingString = JSON.stringify(fundingDbTable);
     const contactsString = JSON.stringify(contactsDbTable);
 
-    //Tekoälylle tehtävä pyyntö
-
-    const jsonReplyFormat = z.object({
-      content: z.string(),
-      subject: z.string(),
-      recipient: z.string(),
-      message: z.string()
-    });
+    //openAI request
 
     const aiResponse = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -176,7 +129,7 @@ Deno.serve(async (req) => {
         {
           role: 'system', 
           content: 
-          `Rajoita vastauksesi noin 15 virkkeeseen. Olet avulias avustaja, jonka tehtävä on auttaa yrittäjiä kehittämään heidän hankeideoitaan.
+                    `Rajoita vastauksesi noin 15 virkkeeseen. Olet avulias avustaja, jonka tehtävä on auttaa yrittäjiä kehittämään heidän hankeideoitaan.
                     Käytä kontekstina ${contextString}. Rahoituslähteet ovat taulukossa: ${fundingString}. Edustajien yhteystiedot ovat taulussa: ${contactsString}.
                     Päättele kontekstin avulla, soveltuuko idea hankkeeksi ja miten se voitaisiin toteuttaa hyödyntämällä AMK:n resursseja. 
                     Noudata viestissäsi alla olevia ohjeita:
@@ -186,7 +139,7 @@ Deno.serve(async (req) => {
                     4. Ehdota myös vähintään kolmea rahoituslähdettä hankeidealle käyttäen rahoituslähdetaulua, anna rahoitusehdotukset käytännön ehdotusten jälkeen.
                     5. Valitse yhteystiedoista hankeideaan parhaiten soveltuva edustaja, ja anna hänen yhteystietonsa yrittäjälle, anna yhteystiedot viimeisenä.
                     ---
-                    Laita viestisi sisältö content-kenttään, valitsemasi edustajan sähköpostiosoite recipient-kenttään ja esimerkkiaihe hankkeelle subject-kenttään. 
+                    Luo JSON-objekti laittamalla viestisi sisältö content-kenttään, valitsemasi edustajan sähköpostiosoite recipient-kenttään ja esimerkkiaihe hankkeelle subject-kenttään. 
                     Tiivistä antamasi vastaus sähköpostiin sopivaksi message-kenttään, kirjoita sähköpostiviesti niin, että yrittäjä olisi kirjoittanut sen.`
                     
                       
@@ -196,7 +149,7 @@ Deno.serve(async (req) => {
           content: query
         }
       ],
-      response_format: zodResponseFormat(jsonReplyFormat, "hankeidea"),
+      response_format: { type: "json_object" },
       stream: false,
     });
 
@@ -207,9 +160,9 @@ Deno.serve(async (req) => {
     headers: { 'Content-Type': 'application/json', ...corsHeaders },
   });
 
-  } catch (error: any) {
+  } catch (error) {
     console.log(error);
-    return new Response(JSON.stringify({error: error.message}), {status: 500});
+    return new Response(JSON.stringify(error), {status: 500});
   }
 
 });
