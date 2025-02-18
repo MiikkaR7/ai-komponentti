@@ -10,10 +10,6 @@ const corsHeaders = {
 };
 
 
-(BigInt.prototype as any).toJSON = function () {
-  return this.toString();
-};
-
 // Tietokantayhteys
 const databaseUrl = Deno.env.get('SUPABASE_DB_URL');
 const pool = new postgres.Pool(databaseUrl, 100, true);
@@ -102,7 +98,7 @@ Deno.serve(async (req) => {
 
   } catch (error) {
     console.log(error);
-    return new Response(JSON.stringify({error: error.message}), {status: 500});
+    return new Response(JSON.stringify(error), {status: 500});
   }
 
 });
