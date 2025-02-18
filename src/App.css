@@ -332,6 +332,15 @@ body {
         background-color: #ffffff;
     }
 
+    .komponentti-header {
+        margin: 0 auto;
+        margin-top: 10px;
+        margin-bottom: 10px;
+        font-size: 20px;
+        color: #333;
+        padding: 0;
+    }
+
     .user-prompt-form {
         position: relative;
         display: grid;
