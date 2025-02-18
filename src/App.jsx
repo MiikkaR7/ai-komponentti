@@ -1,5 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
 import { supabase } from './supabase.js';
+
+import Accordion from './components/Accordion.jsx';
+
 import './App.css';
 
 const App = () => {
@@ -269,28 +272,16 @@ const App = () => {
             {supabasePromptButtonState}
           </form>
 
-          <button className="accordion" onClick={(e) => handleResponseAccordion(e)}>
-            Tekoälyn vastaus
-            {responseVisibilityState ? <span className="accordion-open-close">-</span> : <span className="accordion-open-close">+</span>}
-            <div className={`accordion-content ${responseVisibilityState ? "open" : ""}`}>
-              {responseVisibilityState && <>{supabaseResponseState}</>}
-            </div>
-          </button>
+          <Accordion title="Tekoälyn vastaus" isOpen={responseVisibilityState} toggle={(e) => handleResponseAccordion(e)}>
+            {supabaseResponseState}
+          </Accordion>
 
-          <button className="accordion" onClick={(e) => handleExpertAccordion(e)}>
-            DEMO: Asiantuntijalle vastaus
-            {expertResponseVisibilityState ? <span className="accordion-open-close">-</span> : <span className="accordion-open-close">+</span>}
-            <div className={`accordion-content ${expertResponseVisibilityState ? "open" : ""}`}>
-              {expertResponseVisibilityState && <>{supabaseExpertResponseState}</>}
-            </div>
-          </button>
+          <Accordion title="DEMO: Expert response" isOpen={expertResponseVisibilityState} toggle={(e) => handleExpertAccordion(e)}>
+            {supabaseExpertResponseState}
+          </Accordion>
 
           {contactFormVisibilityState && (
-            <button className="accordion" onClick={(e) => handleContactFormAccordion(e)}>
-              Yhteydenottolomake
-              {contactFormAccordionState ? <span className="accordion-open-close">-</span> : <span className="accordion-open-close">+</span>}
-              <div className={`accordion-content ${contactFormAccordionState ? "open" : ""}`}>
-                {contactFormAccordionState && (
+            <Accordion title="Yhteydenottolomake" isOpen={contactFormAccordionState} toggle={(e) => handleContactFormAccordion(e)}>
                   <form
                     className="contact-form"
                     onSubmit={async (e) => {
@@ -350,9 +341,7 @@ const App = () => {
                     />
                     <input className="contact-form-button" type="submit" value="Lähetä" />
                   </form>
-                )}
-              </div>
-            </button>
+            </Accordion>
           )}
         </div>
       )}
