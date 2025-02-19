@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { supabase } from './supabase.js';
+import { supabase } from './components/supabase.js';
 
 import Accordion from './components/Accordion.jsx';
 
@@ -21,9 +21,11 @@ const App = () => {
 
   useEffect(() => {
     setSupabaseResponseState(<div className="ai-response" ref={supabaseResponseRef}>{supabaseResponseText}</div>);
-    if (supabaseResponseRef.current) {
-      supabaseResponseRef.current.scrollTop = supabaseResponseRef.current.scrollHeight;
-    };
+
+      if (supabaseResponseRef.current) {
+        supabaseResponseRef.current.scrollTop = supabaseResponseRef.current.scrollHeight;
+      };
+      
   }, [supabaseResponseText]);
 
 
@@ -348,8 +350,6 @@ const App = () => {
     </>
   );
 
-
-
-}
+};
 
 export default App;
