@@ -215,7 +215,7 @@ const App = () => {
   //Accordion close/open functions
 
   const handleResponseAccordion = (event) => {
-    if (event.target.className == "ai-response") {
+    if (event.target.className === "ai-response") {
       event.stopPropagation();
       return;
     }
@@ -223,7 +223,7 @@ const App = () => {
   }
 
   const handleExpertAccordion = (event) => {
-    if (event.target.className == "ai-response") {
+    if (event.target.className === "ai-response") {
       event.stopPropagation();
       return;
     }
@@ -233,7 +233,7 @@ const App = () => {
   const handleContactFormAccordion = (event) => {
 
     // Dont trigger accordion if trying to use the contact form
-    if (event.target.tagName == "INPUT" || event.target.tagName == "TEXTAREA" || event.target.tagName == "SELECT" || event.target.tagName == "DIV") {
+    if (event.target.className !== "accordion" && event.target.className !== "accordion-open-close") {
       event.stopPropagation();
       return;
     }

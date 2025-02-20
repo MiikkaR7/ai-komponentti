@@ -26,6 +26,7 @@ Deno.serve(async (req) => {
   //Have to interact with preflight request before parsing request body
 
   const origin = req.headers.get('Origin');
+  console.log(origin);
 
   try {
 

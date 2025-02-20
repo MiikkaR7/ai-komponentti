@@ -1,14 +1,15 @@
 .accordion {
     position: relative;
-    width: 475px;
-    background-color: #ffffff;
-    color: #333;
+    width: 455px;
     cursor: pointer;
+    margin: 0 auto;
     margin-bottom: 2px;
     padding: 15px;
     border: 1px solid #c2c2c2;
     border-radius: 5px;
     outline: none;
+    background-color: #ffffff;
+    color: #333;
     text-align: left;
     font-family: 'Manrope', sans-serif;
     font-size: 15px;
