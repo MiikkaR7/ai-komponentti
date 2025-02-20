@@ -2,6 +2,7 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import sgMail from 'npm:@sendgrid/mail';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import OpenAI from 'https://deno.land/x/openai@v4.24.0/mod.ts'
+import { fromFileUrl } from "https://deno.land/std@0.160.0/path/win32.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -26,7 +27,7 @@ Deno.serve(async (req) => {
   //Have to interact with preflight request before parsing request body
 
   const origin = req.headers.get('Origin');
-  console.log(origin);
+  console.log("Origin: " + origin);
 
   try {
 
@@ -37,8 +38,10 @@ Deno.serve(async (req) => {
       messages: [
         {
           role: "system",
-          content: `Olet roskapostia estävä tarkastaja. Analysoi, onko viesti, jonka käyttäjä haluaa lähettää roskapostia. 
-          Palauta arvo väliltä 0-100, jossa 0 on asiallinen viesti ja 100 roskapostia.`
+          content: `Olet roskapostia estävä tarkastaja. Analysoi, onko viesti, jonka käyttäjä haluaa lähettää roskapostia.
+                    Jos viesti sisältää vain yhden virkkeen tai irrallisia sanoja/kirjaimia, sen voi olettaa olevan roskapostia.
+                    Jos viesti ei sisällä konkreettista hankeideaa, se on roskapostia.
+                    Palauta käyttäjän viestistä arvio asteikolla 0-100, jossa 0 on asiallinen viesti ja 100 roskapostia, vastaa vain numerolla.`
         },
         {
           role: "user",
@@ -48,18 +51,25 @@ Deno.serve(async (req) => {
     });
 
     const aiResponse = spamCheck.choices[0].message.content;
-    const spamLikelihood = parseFloat(aiResponse!);
+    const spamLikelihood = parseInt(aiResponse!);
 
     console.log("Spam likelihood: " + spamLikelihood);
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    const { error } = await supabase
-    .from('emails')
-    .insert({ sender: message.sender, recipient: message.recipient, subject: message.subject, message: message.message, spam_likelihood: spamLikelihood });
+    if (spamLikelihood < 50) {
 
-    if (error) {
-      throw new Error(JSON.stringify(error.message));
+      const { error } = await supabase
+      .from('emails')
+      .insert({ sender: message.sender, recipient: message.recipient, subject: message.subject, message: message.message, spam_likelihood: spamLikelihood });
+
+      if (error) {
+        throw new Error(JSON.stringify(error.message));
+      }
+
+    } else {
+      console.log("Spam likelihood: " + spamLikelihood);
+      throw new Error("Message filtered as spam");
     }
 
     return new Response((JSON.stringify(message)), {
