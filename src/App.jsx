@@ -310,14 +310,6 @@ const App = () => {
                         type="email"
                         required
                       />
-                      <input
-                        value={contactFormSubjectState}
-                        onChange={handleContactFormSubjectInput}
-                        name="contact-form-subject"
-                        className="contact-form-inputs-input"
-                        placeholder="Hankeidea"
-                        required
-                      />
                       <select
                         value={contactFormRecipientState}
                         onChange={handleContactFormRecipientInput}
@@ -332,8 +324,15 @@ const App = () => {
                         <option value="jyrki.huhtaniska@lapinamk.fi">jyrki.huhtaniska@lapinamk.fi</option>
                         <option value="anne-mari.vaisanen@lapinamk.fi">anne-mari.vaisanen@lapinamk.fi</option>
                       </select>
-                    </div>
-                    <textarea
+                      <input
+                        value={contactFormSubjectState}
+                        onChange={handleContactFormSubjectInput}
+                        name="contact-form-subject"
+                        className="contact-form-inputs-input"
+                        placeholder="Hankeidea"
+                        required
+                      />
+                      <textarea
                       value={contactFormMessageState}
                       onChange={handleContactFormMessageInput}
                       name="contact-form-message"
@@ -342,6 +341,7 @@ const App = () => {
                       required
                     />
                     <input className="contact-form-button" type="submit" value="Lähetä" />
+                    </div>
                   </form>
             </Accordion>
           )}
