@@ -1,6 +1,7 @@
 .accordion {
     position: relative;
-    width: 455px;
+    width: 90%;
+    max-width: 455px;
     cursor: pointer;
     margin: 0 auto;
     margin-bottom: 2px;
@@ -27,7 +28,7 @@
   }
   
   .accordion-content.open {
-    max-height: 250px;
+    max-height: 500px;
     padding: 15px;
   }
 
@@ -41,7 +42,8 @@
   @media (max-width: 500px) {
     .accordion {
         position: relative;
-        width: 95%;
+        width: 90%;
+        max-width: 260px;
         background-color: #ffffff;
         color: #333;
         cursor: pointer;
@@ -54,4 +56,9 @@
         font-family: 'Manrope', sans-serif;
         font-size: 15px;
       }
+
+    .accordion-content.open {
+      max-height: 300px;
+      padding: 15px;
+    }
   }
