@@ -153,7 +153,6 @@ body {
     width: 100%;
     max-width: 400px;
     height: 130px;
-    margin: 0 auto;
     box-sizing: border-box;
     padding: 10px;
     border: 1px solid #ccc;
@@ -173,7 +172,6 @@ body {
     font-family: 'Manrope', sans-serif;
     width: 95px;
     height: 40px;
-    margin: 0 auto;
     margin-top: 10px;
     font-size: 16px;
     color: #000000;
