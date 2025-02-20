@@ -2,7 +2,6 @@ import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import sgMail from 'npm:@sendgrid/mail';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
 import OpenAI from 'https://deno.land/x/openai@v4.24.0/mod.ts'
-import { fromFileUrl } from "https://deno.land/std@0.160.0/path/win32.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -23,11 +22,6 @@ Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
-
-  //Have to interact with preflight request before parsing request body
-
-  const origin = req.headers.get('Origin');
-  console.log("Origin: " + origin);
 
   try {
 
