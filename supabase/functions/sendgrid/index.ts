@@ -23,11 +23,6 @@ Deno.serve(async (req) => {
     return new Response('ok', { headers: corsHeaders });
   }
 
-  //Have to interact with preflight request before parsing request body
-
-  const origin = req.headers.get('Origin');
-  console.log("Origin: " + origin);
-
   try {
 
     const message = await req.json();
