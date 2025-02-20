@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import sgMail from 'npm:@sendgrid/mail';
 import { createClient } from 'jsr:@supabase/supabase-js@2';
+import OpenAI from 'https://deno.land/x/openai@v4.24.0/mod.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -10,6 +11,11 @@ const corsHeaders = {
 sgMail.setApiKey(Deno.env.get('SENDGRID_KEY')!);
 const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
 const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+const apiKey = Deno.env.get('OPENAI_API_KEY');
+  const openai = new OpenAI({
+    apiKey: apiKey,
+  });
 
 Deno.serve(async (req) => {
 
@@ -21,17 +27,57 @@ Deno.serve(async (req) => {
 
   const origin = req.headers.get('Origin');
 
-  const message = await req.json();
+  try {
 
-  const supabase = createClient(supabaseUrl, supabaseKey);
+    const message = await req.json();
 
-  const { error } = await supabase
+    const spamCheck = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        {
+          role: "system",
+          content: `Olet roskapostia estävä tarkastaja. Analysoi, onko viesti, jonka käyttäjä haluaa lähettää roskapostia. 
+          Palauta arvo väliltä 0-100, jossa 0 on asiallinen viesti ja 100 roskapostia.`
+        },
+        {
+          role: "user",
+          content: JSON.stringify(message)
+        }
+      ]
+    });
+
+    const aiResponse = spamCheck.choices[0].message.content;
+    const spamLikelihood = parseFloat(aiResponse!);
+
+    console.log("Spam likelihood: " + spamLikelihood);
+
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    const { error } = await supabase
     .from('emails')
-    .insert({ sender: message.sender, recipient: message.recipient, subject: message.subject, message: message.message });
+    .insert({ sender: message.sender, recipient: message.recipient, subject: message.subject, message: message.message, spam_likelihood: spamLikelihood });
 
     if (error) {
       throw new Error(JSON.stringify(error.message));
     }
+
+    return new Response((JSON.stringify(message)), {
+      status: 202,
+      headers: { 
+        'Content-Type': 'application/json',
+        ...corsHeaders
+       },
+    });
+
+
+  } catch (error) {
+
+    console.log(error);
+    return new Response(JSON.stringify(error), {status: 500});
+
+  }
+
+
 
 
   //Email functionality (TODO: Verified sender address)
@@ -55,12 +101,4 @@ Deno.serve(async (req) => {
 
   } */
   
-  return new Response((JSON.stringify(message)), {
-    status: 202,
-    headers: { 
-      'Content-Type': 'application/json',
-      ...corsHeaders
-     },
-  }
-  );
 });
