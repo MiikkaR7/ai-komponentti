@@ -159,7 +159,7 @@ const App = () => {
     const sender = formData.get('contact-form-sender');
     const recipient = formData.get('contact-form-recipient');
     const message = formData.get('contact-form-message');
-    const specialistMessage = supabaseExpertResponseState;
+    const specialistMessage = supabaseExpertResponseState.props.children;
 
     formElement.reset();
 
@@ -171,7 +171,7 @@ const App = () => {
           sender: sender,
           recipient: recipient,
           message: message,
-          specialistMessage: specialistMessage.props.children
+          specialistMessage: specialistMessage
         }
 
       });
