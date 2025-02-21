@@ -28,13 +28,13 @@ Deno.serve(async (req) => {
     const message = await req.json();
 
     const spamCheck = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [
         {
           role: "system",
           content: `Olet roskapostia estävä tarkastaja. Analysoi, onko viesti, jonka käyttäjä haluaa lähettää roskapostia.
-                    Jos viesti sisältää vain yhden virkkeen tai irrallisia sanoja/kirjaimia, sen voi olettaa olevan roskapostia.
-                    Jos viesti ei sisällä konkreettista hankeideaa, se on roskapostia.
+                    Jos viesti sisältää vain yhden virkkeen, irrallisia sanoja/kirjaimia tai se on alle 150 merkkiä, se on roskapostia.
+                    Jos viesti ei sisällä konkreettisia seikkoja, toiminta-ehdotuksia tai rahoitustiedustelua, vaan pelkän aihe-ehdotuksen nimen, se on roskapostia.
                     Palauta käyttäjän viestistä arvio asteikolla 0-100, jossa 0 on asiallinen viesti ja 100 roskapostia, vastaa vain numerolla.`
         },
         {
