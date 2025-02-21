@@ -27,6 +27,8 @@ Deno.serve(async (req) => {
 
     const message = await req.json();
 
+    //Use AI to detect misuse/spam/junk messages
+
     const spamCheck = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -44,14 +46,18 @@ Deno.serve(async (req) => {
       ]
     });
 
+    //Parse spam probability from gpt4o-mini response
+    //Set spam threshold as adjustable value from 0-100
+
     const aiResponse = spamCheck.choices[0].message.content;
     const spamLikelihood = parseInt(aiResponse!);
+    const spamThreshold = 50;
 
-    console.log("Spam likelihood: " + spamLikelihood);
+    //Save email to supabase if it is not spam, do not save spam messages
 
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    if (spamLikelihood < 50) {
+    if (spamLikelihood < spamThreshold) {
 
       const { error } = await supabase
       .from('emails')
