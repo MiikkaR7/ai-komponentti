@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
 
       const { error } = await supabase
       .from('emails')
-      .insert({ sender: message.sender, recipient: message.recipient, subject: message.subject, message: message.message, spam_likelihood: spamLikelihood });
+      .insert({ sender: message.sender, recipient: message.recipient, subject: message.subject, message: message.message, spam_likelihood: spamLikelihood, specialist_response: message.specialistMessage });
 
       if (error) {
         throw new Error(JSON.stringify(error.message));
