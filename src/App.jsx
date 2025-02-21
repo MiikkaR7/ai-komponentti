@@ -63,12 +63,13 @@ const App = () => {
   const handleContactFormMessageInput = (e) => {
     setContactFormMessageState(e.target.value);
   }
-  //openAI API function
+
+  //Response to entrepreneur using hankeai Edge function
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    //Open AI response accordion, hide contact form and submit button and render loading spinner
+    //Entrepreneur response accordion, hide contact form and submit button and render loading spinner
 
     setResponseVisibilityState(true);
     setContactFormVisibilityState(false);
@@ -78,7 +79,7 @@ const App = () => {
     setSupabaseResponseState(<div className="loading-spinner"></div>);
     setSupabaseExpertResponseState(<div className="loading-spinner"></div>);
 
-    //Response to entrepreneur
+    //Call edge function
 
     try {
       const { data, error } = await supabase.functions.invoke('hankeai', {
@@ -90,7 +91,6 @@ const App = () => {
       }
 
       //Autofill contact form based on AI response
-
       setContactFormSubjectState(data.subject);
       setContactFormRecipientState(data.recipient);
       setContactFormMessageState(data.message);
@@ -138,8 +138,10 @@ const App = () => {
       );
     }
 
+    //After getting responses, make Sparraa-button clickable again and make contact form visible
+
     setSupabasePromptButtonState(
-      <input className="user-prompt-form-button" type="submit" value="Sparraa" />
+      <input className="user-prompt-form-button" type="submit" value="Sparraa"/>
     );
     setContactFormVisibilityState(true);
   };
@@ -157,6 +159,7 @@ const App = () => {
     const sender = formData.get('contact-form-sender');
     const recipient = formData.get('contact-form-recipient');
     const message = formData.get('contact-form-message');
+    const specialistMessage = supabaseExpertResponseState;
 
     formElement.reset();
 
@@ -167,7 +170,8 @@ const App = () => {
           subject: subject,
           sender: sender,
           recipient: recipient,
-          message: message
+          message: message,
+          specialistMessage: specialistMessage.props.children
         }
 
       });
