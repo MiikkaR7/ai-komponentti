@@ -1,18 +1,10 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import OpenAI from 'https://deno.land/x/openai@v4.24.0/mod.ts'
-import { supabase } from "../supabase.ts";
+import { supabase, openAI } from "../supabase.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
-
-// openAI connection
-
-const apiKey = Deno.env.get('OPENAI_API_KEY');
-  const openai = new OpenAI({
-    apiKey: apiKey,
-  });
 
 Deno.serve(async (req) => {
 
@@ -26,7 +18,7 @@ Deno.serve(async (req) => {
 
     //Use AI to detect misuse/spam/junk messages
 
-    const spamCheck = await openai.chat.completions.create({
+    const spamCheck = await openAI.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {

@@ -1,6 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import OpenAI from 'https://deno.land/x/openai@v4.24.0/mod.ts'
-import { supabase } from "../supabase.ts";
+import { supabase, openAI } from "../supabase.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -16,13 +15,6 @@ Deno.serve(async (req) => {
   // User input
 
   const { query } = await req.json();
-
-  // openAI connection
-
-  const apiKey = Deno.env.get('OPENAI_API_KEY');
-  const openai = new OpenAI({
-    apiKey: apiKey,
-  });
 
   try {
 
@@ -44,7 +36,7 @@ Deno.serve(async (req) => {
 
     // openAI request
 
-    const ExpertResponse = await openai.chat.completions.create({
+    const ExpertResponse = await openAI.chat.completions.create({
       model: "gpt-4o",
       messages: [
         {
