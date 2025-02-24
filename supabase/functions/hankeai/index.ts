@@ -1,31 +1,25 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import OpenAI from 'https://deno.land/x/openai@v4.24.0/mod.ts'
-import { createClient } from 'jsr:@supabase/supabase-js@2';
+import { supabase } from "../supabase.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, api_key, content-type',
 };
 
-//Supabase connection
-//Can use service role key since edge function is not exposed to user/browser, only invoked with anon key from browser
-
-const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-
 Deno.serve(async (req) => {
 
-  //Preflight request
+  // Preflight request
 
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
   }
 
-  //User input
+  // User input
 
   const { query } = await req.json();
 
-  //openAI connection
+  // openAI connection
 
   const apiKey = Deno.env.get('OPENAI_API_KEY');
   const openai = new OpenAI({
@@ -34,32 +28,31 @@ Deno.serve(async (req) => {
 
   try {
 
-    //Rate limit using database table ratelimit_hankeai
-    //Get table data
+    // Rate limit using database table ratelimit_hankeai
+    // Get table data
 
-    const supabase = createClient(supabaseUrl, serviceRoleKey);
     const { data: fetchData, error: fetchError } = await supabase.from('ratelimit_hankeai').select('reset_at, requests, resets');
 
     if (fetchError) {
       throw new Error(fetchError.message);
     }
     
-    //Set rate limit and reset threshold
+    // Set rate limit and reset threshold
     const rateLimit = 100;
     const resetTreshold = 86400000;
 
-    //Get current amount of requests, resets and last reset time from table ratelimit_hankeai
+    // Get current amount of requests, resets and last reset time from table ratelimit_hankeai
     const requests = fetchData![0].requests;
     const resets = fetchData![0].resets;
     const resetAt = fetchData![0].reset_at;
-    //Convert reset time timestamptz to Date and get current time
+    // Convert reset time timestamptz to Date and get current time
     const resetAtDate = new Date(resetAt);
     const currentTime = Date.now();
 
-    //Calculate time difference between last reset than now, reset the time if 24 hours have passed
+    // Calculate time difference between last reset than now, reset the time if 24 hours have passed
     const timeDifference = currentTime - resetAtDate.getTime();
 
-    //Rate limit logic, first check if more than 24 hours have passed since last reset, then enforce rate limit, after that allow request
+    // Rate limit logic, first check if more than 24 hours have passed since last reset, then enforce rate limit, after that allow request
     if (timeDifference > resetTreshold) {
 
       console.log("Rate limit expired, resetting")
@@ -84,7 +77,7 @@ Deno.serve(async (req) => {
 
     } else if (requests >= rateLimit) {
 
-      //Rate limit is 100 requests in 24 hours
+      // Rate limit is 100 requests in 24 hours
       throw new Error("Rate limit exceeded");
 
     } else {
@@ -121,7 +114,7 @@ Deno.serve(async (req) => {
     const fundingString = JSON.stringify(fundingDbTable);
     const contactsString = JSON.stringify(contactsDbTable);
 
-    //openAI request
+    // openAI request
 
     const aiResponse = await openai.chat.completions.create({
       model: "gpt-4o",
