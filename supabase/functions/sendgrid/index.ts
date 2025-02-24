@@ -1,21 +1,6 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import sgMail from 'npm:@sendgrid/mail';
-import { createClient } from 'jsr:@supabase/supabase-js@2';
-import OpenAI from 'https://deno.land/x/openai@v4.24.0/mod.ts'
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
-sgMail.setApiKey(Deno.env.get('SENDGRID_KEY')!);
-const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
-
-const apiKey = Deno.env.get('OPENAI_API_KEY');
-  const openai = new OpenAI({
-    apiKey: apiKey,
-  });
+import { supabase, openAI } from "../supabase.ts";
+import { corsHeaders } from "../corsHeaders.ts";
 
 Deno.serve(async (req) => {
 
@@ -29,7 +14,7 @@ Deno.serve(async (req) => {
 
     //Use AI to detect misuse/spam/junk messages
 
-    const spamCheck = await openai.chat.completions.create({
+    const spamCheck = await openAI.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
         {
@@ -54,8 +39,6 @@ Deno.serve(async (req) => {
     const spamThreshold = 50;
 
     //Save email to supabase if it is not spam, do not save spam messages
-
-    const supabase = createClient(supabaseUrl, supabaseKey);
 
     if (spamLikelihood < spamThreshold) {
 
@@ -88,28 +71,4 @@ Deno.serve(async (req) => {
 
   }
 
-
-
-
-  //Email functionality (TODO: Verified sender address)
-
-  /* try {
-
-    const msg = {
-      from: Deno.env.get('SENDGRID_SENDER') ?? '',
-      replyTo: message.sender,
-      subject: message.subject,
-      to: message.recipient,
-      text: message.message,
-  };
-
-    response = await sgMail.send(msg);
-
-  } catch (error) {
-
-    console.error(error);
-    return new Response(String('Internal server error'), { status: 500 });
-
-  } */
-  
 });
