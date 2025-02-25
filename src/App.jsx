@@ -133,9 +133,9 @@ const App = () => {
       setResponseFinishedState(false);
       setSupabaseResponseText("");
       let i = -1;
-      const interval = setInterval(async () => {
+      const interval = setInterval(() => {
         if (i < (data.content.length - 1)) {
-          await setSupabaseResponseText((prev) => prev + data.content[i]);
+          setSupabaseResponseText((prev) => prev + data.content[i]);
           i++;
         } else {
           clearInterval(interval);
