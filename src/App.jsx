@@ -7,7 +7,7 @@ import './App.css';
 
 const App = () => {
 
-  //States for responses and buttons in application flow
+  // States for responses and buttons in application flow
 
   const [contactFormVisibilityState, setContactFormVisibilityState] = useState(true);
   const [supabaseResponseText, setSupabaseResponseText] = useState("Lähetä hankeideasi, jotta saat vastauksen!");
@@ -17,8 +17,20 @@ const App = () => {
   const [modalOpenState, setModalOpenState] = useState(false);
   const [userPromptState, setUserPromptState] = useState('');
 
-  //Simulate streaming and automatically scroll AI response
-  //Stop automatic scrolling if user interacts with response text
+  // Simulate streaming in the frontend
+
+
+  const streamNextChar = (data, i) => {
+    if (i < data.content.length) {
+      setSupabaseResponseText((prev) => prev + data.content[i]);
+      setTimeout(() => streamNextChar(data, i + 1), 15);
+    } else {
+      setResponseFinishedState(true);
+    }
+  }
+
+  // Automatically scroll AI response
+  // Stop automatic scrolling if user interacts with response text
 
   const [userMouseDown, setUserMouseDown] = useState(false);
   const [responseFinishedState, setResponseFinishedState] = useState(true);
@@ -105,15 +117,14 @@ const App = () => {
 
     setResponseVisibilityState(true);
     setContactFormVisibilityState(false);
-    setSupabasePromptButtonState(
-      <input className="user-prompt-form-button-disabled" value="Sparraa" disabled />
-    );
+    setSupabasePromptButtonState(<input className="user-prompt-form-button-disabled" value="Sparraa" disabled/>);
     setSupabaseResponseState(<div className="loading-spinner"></div>);
     setSupabaseExpertResponseState(<div className="loading-spinner"></div>);
 
     //Call edge function
 
     try {
+
       const { data, error } = await supabase.functions.invoke('hankeai', {
         body: JSON.stringify({ query: userPromptState }),
       });
@@ -127,33 +138,25 @@ const App = () => {
       setContactFormRecipientState(data.recipient);
       setContactFormMessageState(data.message);
 
-      //Simulate streaming by rendering the text letter by letter
-      //Set response as not finished until it is
+      //Simulate streaming
 
       setResponseFinishedState(false);
       setSupabaseResponseText("");
-      let i = -1;
-      const interval = setInterval(() => {
-        if (i < (data.content.length - 1)) {
-          setSupabaseResponseText((prev) => prev + data.content[i]);
-          i++;
-        } else {
-          clearInterval(interval);
-          setResponseFinishedState(true);
-        }
-      }, 15);
+      
+      const i = 0;
+      streamNextChar(data, i);
 
     } catch (error) {
       setSupabaseResponseState(
         <div className="ai-response-error">
           <p>Error: {error.message}</p>
         </div>
-      );
-    }
+      )}
 
     //Response to AMK Specialist/Expert
 
     try {
+
       const { data, error } = await supabase.functions.invoke('hankeai-expert', {
         body: JSON.stringify({ query: userPromptState }),
       });
@@ -171,14 +174,11 @@ const App = () => {
         <div className="ai-response-error">
           <p>Error: {error.message}</p>
         </div>
-      );
-    }
+      )};
 
     //After getting responses, make Sparraa-button clickable again and make contact form visible
 
-    setSupabasePromptButtonState(
-      <input className="user-prompt-form-button" type="submit" value="Sparraa"/>
-    );
+    setSupabasePromptButtonState(<input className="user-prompt-form-button" type="submit" value="Sparraa"/>);
     setContactFormVisibilityState(true);
   };
 
