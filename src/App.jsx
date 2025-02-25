@@ -18,15 +18,47 @@ const App = () => {
   const [userPromptState, setUserPromptState] = useState('');
 
   //Simulate streaming and automatically scroll AI response
+  //Stop automatic scrolling if user interacts with response text
+
+  const [userMouseDown, setUserMouseDown] = useState(false);
+  const [responseFinishedState, setResponseFinishedState] = useState(true);
+
+  const handleMouseDown = () => {
+    setUserMouseDown(true);
+  }
+
+  const handleMouseUp = () => {
+    setUserMouseDown(false);
+  }
+
+  //useEffect updates supabaseResponseState with incoming text
+  //Scroll automatically unless user interacts with response (Better to stop scrolling entirely if user interacts?)
 
   useEffect(() => {
-    setSupabaseResponseState(<div className="ai-response" ref={supabaseResponseRef}>{supabaseResponseText}</div>);
+    setSupabaseResponseState(
+    <button 
+      className="ai-response"
+      onScroll={handleMouseDown}
+      onScrollEnd={handleMouseUp}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+      ref={supabaseResponseRef}>
 
-      if (supabaseResponseRef.current) {
-        supabaseResponseRef.current.scrollTop = supabaseResponseRef.current.scrollHeight;
-      };
-      
-  }, [supabaseResponseText]);
+        {supabaseResponseText}
+
+    </button>);
+
+    if (!responseFinishedState) {
+
+     if (!userMouseDown) {
+
+      supabaseResponseRef.current?.scrollTop = supabaseResponseRef.current?.scrollHeight;
+
+    }
+
+  }
+
+  }, [supabaseResponseText, userMouseDown, responseFinishedState]);
 
 
   //Accordions
@@ -96,14 +128,18 @@ const App = () => {
       setContactFormMessageState(data.message);
 
       //Simulate streaming by rendering the text letter by letter
+      //Set response as not finished until it is
+
+      setResponseFinishedState(false);
       setSupabaseResponseText("");
       let i = -1;
-      const interval = setInterval(() => {
+      const interval = setInterval(async () => {
         if (i < (data.content.length - 1)) {
-          setSupabaseResponseText((prev) => prev + data.content[i]);
+          await setSupabaseResponseText((prev) => prev + data.content[i]);
           i++;
         } else {
           clearInterval(interval);
+          setResponseFinishedState(true);
         }
       }, 15);
 
@@ -163,8 +199,6 @@ const App = () => {
 
     formElement.reset();
 
-    try {
-
       const { error } = await supabase.functions.invoke('sendgrid', {
         body: {
           subject: subject,
@@ -179,12 +213,6 @@ const App = () => {
       if (error) {
         throw new Error('Error sending email');
       }
-
-    } catch (error) {
-
-      console.log(error);
-
-    }
 
   }
 
