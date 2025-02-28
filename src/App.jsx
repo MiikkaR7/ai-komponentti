@@ -117,6 +117,8 @@ const App = () => {
           <button
             type="button"
             className="ai-response"
+            onScroll={handleMouseDown}
+            onScrollEnd={handleMouseUp}
             onMouseDown={handleMouseDown}
             onMouseUp={handleMouseUp}
             ref={supabaseResponseRef}
