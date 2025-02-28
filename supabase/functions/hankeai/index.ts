@@ -118,27 +118,30 @@ Deno.serve(async (req) => {
                     2. Muotoile ehdotukset ja rahoitusehdotukset ilman luettelomerkkejä.
                     3. Anna yrittäjälle käytännön ehdotuksia vastaanotetun idean toteuttamiseen, älä ikinä anna ehdotusta, jonka yrittäjä on jo maininnut viestissään.
                     4. Ehdota myös vähintään kolmea rahoituslähdettä hankeidealle käyttäen rahoituslähdetaulua, anna rahoitusehdotukset käytännön ehdotusten jälkeen.
-                    5. Valitse yhteystiedoista hankeideaan parhaiten soveltuva edustaja, ja anna hänen yhteystietonsa yrittäjälle, anna yhteystiedot viimeisenä.
-                    ---
-                    Luo JSON-objekti laittamalla viestisi sisältö content-kenttään, valitsemasi edustajan sähköpostiosoite recipient-kenttään ja esimerkkiaihe hankkeelle subject-kenttään. 
-                    Tiivistä antamasi vastaus sähköpostiin sopivaksi message-kenttään, kirjoita sähköpostiviesti niin, että yrittäjä olisi kirjoittanut sen.`
-                    
-                      
+                    5. Valitse yhteystiedoista hankeideaan parhaiten soveltuva edustaja, ja anna hänen yhteystietonsa yrittäjälle, anna yhteystiedot viimeisenä.`                    
         },
         {
           role: 'user', 
           content: query
         }
       ],
-      response_format: { type: "json_object" },
-      temperature: 0.5
+      stream: true,
+      temperature: 0.8
     });
 
-  const reply = aiResponse.choices[0].message.content;
+    const encoder = new TextEncoder();
+    const readableStream = new ReadableStream({
+      async start(controller) {
+        for await (const chunk of aiResponse) {
+          controller.enqueue(encoder.encode(chunk.choices[0]?.delta?.content || ""));
+        }
+        controller.close();
+      }
+    })
 
-  return new Response(reply, {
+  return new Response(readableStream, {
     status: 200,
-    headers: { 'Content-Type': 'application/json', ...corsHeaders },
+    headers: { 'Content-Type': 'text/plain', ...corsHeaders },
   });
 
   } catch (error) {
