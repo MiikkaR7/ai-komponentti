@@ -14,6 +14,7 @@ const App = () => {
   const [supabaseResponseState, setSupabaseResponseState] = useState("");
   const [supabaseExpertResponseState, setSupabaseExpertResponseState] = useState("");
   const [supabasePromptButtonState, setSupabasePromptButtonState] = useState(<input className="user-prompt-form-button" type="submit" value="Sparraa" />);
+  const [contactFormState, setContactFormState] = useState(true);
   const [modalOpenState, setModalOpenState] = useState(false);
   const [userPromptState, setUserPromptState] = useState('');
 
@@ -211,6 +212,8 @@ const App = () => {
         alert("Sparraa ensin");
         throw new Error;
       }
+
+      setContactFormState(false);
       
       const { data, error } = await supabase.functions.invoke('prefill-form', {
         body: JSON.stringify(supabaseResponseText)
@@ -224,6 +227,8 @@ const App = () => {
       setContactFormSubjectState(data.subject);
       setContactFormRecipientState(data.recipient);
       setContactFormMessageState(data.message);
+
+      setContactFormState(true);
 
     } catch (error) {
       throw new Error(error.message);
@@ -325,6 +330,7 @@ const App = () => {
 
           {contactFormVisibilityState && (
             <Accordion title="Yhteydenottolomake" isOpen={contactFormAccordionState} toggle={(e) => handleContactFormAccordion(e)}>
+              {contactFormState ? (
                   <form className="contact-form">
                     <div className="contact-form-inputs">
                       <input
@@ -378,6 +384,7 @@ const App = () => {
                     <button type="button" onClick={handleContactForm} className="contact-form-button">Lähetä</button>
                     </div>
                   </form>
+              ) : <div className="loading-spinner"></div>}
             </Accordion>
           )}
         </div>
