@@ -85,99 +85,116 @@ const App = () => {
 
   }, [supabaseResponseText, userMouseDown, responseFinishedState]);
 
-  //Response to entrepreneur using hankeai Edge function
+  // Response to entrepreneur using hankeai Edge function
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
-
-    //Entrepreneur response accordion, hide contact form and submit button and render loading spinner
-
-    setResponseVisibilityState(true);
-    setContactFormVisibilityState(false);
-    setSupabasePromptButtonState(<input className="user-prompt-form-button-disabled" value="Sparraa" disabled/>);
-    setSupabaseResponseState(<div className="loading-spinner"></div>);
-    setSupabaseExpertResponseState(<div className="loading-spinner"></div>);
-
-    //Call edge function
-
+  const fetchHankeai = async () => {
     try {
-
       const response = await fetch(process.env.SUPABASE_URL + "/functions/v1/hankeai", {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + process.env.SUPABASE_ANON_KEY },
+        headers: { 
+          "Content-Type": "application/json", 
+          "Authorization": "Bearer " + process.env.SUPABASE_ANON_KEY 
+        },
         body: JSON.stringify({ query: userPromptState }),
       });
 
-      if (!response || response === undefined || response === null) {
+      if (!response) {
         throw new Error('Error getting response');
       }
 
       setResponseFinishedState(false);
-      
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let accumulatedText = "";
 
       while (true) {
-
         const { value, done } = await reader.read();
         if (done) break;
-
         const chunk = decoder.decode(value, { stream: true });
         accumulatedText += chunk;
         setSupabaseResponseText(accumulatedText);
         setSupabaseResponseState(
           <button
             type="button"
-            className="ai-response" onScroll={handleMouseDown} onScrollEnd={handleMouseUp} onMouseDown={handleMouseDown} onMouseUp={handleMouseUp}
-            ref={supabaseResponseRef}>
-              {accumulatedText}
-          </button>);
-
+            className="ai-response"
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            ref={supabaseResponseRef}
+          >
+            {accumulatedText}
+          </button>
+        );
       }
 
       setResponseFinishedState(true);
-
     } catch (error) {
       setSupabaseResponseState(
         <div className="ai-response-error">
           <p>Error: {error.message}</p>
         </div>
-      )}
+      );
+    }
+  };
 
-    //Response to AMK Specialist/Expert
+  // Response to AMK specialist
 
+  const fetchExpert = async () => {
     try {
-
       const { data, error } = await supabase.functions.invoke('hankeai-expert', {
         body: JSON.stringify({ query: userPromptState }),
       });
-
       if (error) {
         throw new Error('Expert response error');
       }
-
       setSupabaseExpertResponseState(
         <div className="ai-response">{data.reply}</div>
       );
-
     } catch (error) {
       setSupabaseExpertResponseState(
         <div className="ai-response-error">
           <p>Error: {error.message}</p>
         </div>
-      )};
+      );
+    }
+  };
 
-    //After getting responses, make Sparraa-button clickable again and make contact form visible
+  const handleSubmit = async (event) => {
 
-    setSupabasePromptButtonState(<input className="user-prompt-form-button" type="submit" value="Sparraa"/>);
+    event.preventDefault();
+
+    // Set loading states and open entrepreneur response accordion
+
+    setResponseVisibilityState(true);
+    setSupabasePromptButtonState(<input className="user-prompt-form-button-disabled" type="submit" value="Sparraa" disabled/>);
+    setContactFormVisibilityState(false);
+    setSupabaseResponseState(<div className="loading-spinner"></div>);
+    setSupabaseExpertResponseState(<div className="loading-spinner"></div>);
+  
+    // Invoke both functions concurrently
+
+    await Promise.all([fetchHankeai(), fetchExpert()]);
+  
+    // After both responses update the states and UI
+
+    setSupabasePromptButtonState(
+      <input className="user-prompt-form-button" type="submit" value="Sparraa" />
+    );
     setContactFormVisibilityState(true);
   };
 
 
   //Contact form function
 
-  const handleContactForm = async () => {
+  const handleContactForm = async (event) => {
+
+    event.preventDefault();
+
+    if (supabaseExpertResponseState == "" || supabaseResponseText == "") {
+      
+      alert("Sparraa hankeideasi ensin");
+      return;
+
+    } else {
 
     setModalOpenState(!modalOpenState);
 
@@ -202,16 +219,23 @@ const App = () => {
         throw new Error('Error sending email');
       }
 
+    }
+
   }
+
+  //Function to fill contact form using AI response and Edge function prefill-form
 
   const handlePrefill = async () => {
 
     try {
 
-      if (supabaseResponseText === "") {
-        alert("Sparraa ensin");
-        throw new Error;
-      }
+      // Only allow prefill if sparraus has happened
+
+      if (supabaseExpertResponseState == "" || supabaseResponseText == "") {
+      
+        alert("Sparraa hankeideasi ensin");
+  
+      } else {
 
       setContactFormState(false);
       
@@ -223,12 +247,14 @@ const App = () => {
         throw new Error('Error prefilling contact form');
       }
 
-      //Autofill contact form based on AI response
+      // Autofill contact form based on AI response
       setContactFormSubjectState(data.subject);
       setContactFormRecipientState(data.recipient);
       setContactFormMessageState(data.message);
 
       setContactFormState(true);
+
+      }
 
     } catch (error) {
       throw new Error(error.message);
@@ -236,7 +262,7 @@ const App = () => {
 
   }
 
-  //After submitting contact form, continue prompt or new prompt
+  // After submitting contact form, continue prompt or new prompt
 
   const handleContinue = () => {
     setModalOpenState(false);
@@ -244,7 +270,7 @@ const App = () => {
 
   const handleNewUserInput = () => {
     setUserPromptState("");
-    setSupabaseResponseState("");
+    setSupabaseResponseText("");
     setSupabaseExpertResponseState("");
 
     setContactFormSubjectState("");
@@ -331,7 +357,7 @@ const App = () => {
           {contactFormVisibilityState && (
             <Accordion title="Yhteydenottolomake" isOpen={contactFormAccordionState} toggle={(e) => handleContactFormAccordion(e)}>
               {contactFormState ? (
-                  <form className="contact-form">
+                  <form className="contact-form" onSubmit={handleContactForm}>
                     <div className="contact-form-inputs">
                       <input
                         value={contactFormNameState}
@@ -381,7 +407,7 @@ const App = () => {
                       required
                     />
                     <button type="button" onClick={handlePrefill} className="contact-form-button">Täytä</button>
-                    <button type="button" onClick={handleContactForm} className="contact-form-button">Lähetä</button>
+                    <button type="submit" className="contact-form-button">Lähetä</button>
                     </div>
                   </form>
               ) : <div className="loading-spinner"></div>}
