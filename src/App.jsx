@@ -187,6 +187,12 @@ const App = () => {
 
   const handleContactForm = async () => {
 
+    if (supabaseExpertResponseState == "" || supabaseResponseText == "") {
+      
+      alert("Sparraa hankeideasi ensin");
+
+    } else {
+
     setModalOpenState(!modalOpenState);
 
     const subject = contactFormSubjectState;
@@ -210,6 +216,8 @@ const App = () => {
         throw new Error('Error sending email');
       }
 
+    }
+
   }
 
   //Function to fill contact form using AI response and Edge function prefill-form
@@ -220,10 +228,11 @@ const App = () => {
 
       // Only allow prefill if sparraus has happened
 
-      if (supabaseResponseText === "") {
+      if (supabaseExpertResponseState == "" || supabaseResponseText == "") {
+      
         alert("Sparraa hankeideasi ensin");
-        throw new Error;
-      }
+  
+      } else {
 
       setContactFormState(false);
       
@@ -241,6 +250,8 @@ const App = () => {
       setContactFormMessageState(data.message);
 
       setContactFormState(true);
+
+      }
 
     } catch (error) {
       throw new Error(error.message);
@@ -343,7 +354,7 @@ const App = () => {
           {contactFormVisibilityState && (
             <Accordion title="Yhteydenottolomake" isOpen={contactFormAccordionState} toggle={(e) => handleContactFormAccordion(e)}>
               {contactFormState ? (
-                  <form className="contact-form">
+                  <form className="contact-form" onSubmit={handleContactForm}>
                     <div className="contact-form-inputs">
                       <input
                         value={contactFormNameState}
@@ -393,7 +404,7 @@ const App = () => {
                       required
                     />
                     <button type="button" onClick={handlePrefill} className="contact-form-button">Täytä</button>
-                    <button type="button" onClick={handleContactForm} className="contact-form-button">Lähetä</button>
+                    <button type="submit" className="contact-form-button">Lähetä</button>
                     </div>
                   </form>
               ) : <div className="loading-spinner"></div>}
