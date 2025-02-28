@@ -10,7 +10,7 @@ const App = () => {
   // States for responses and buttons in application flow
 
   const [contactFormVisibilityState, setContactFormVisibilityState] = useState(true);
-  const [supabaseResponseText, setSupabaseResponseText] = useState("Lähetä hankeideasi, jotta saat vastauksen!");
+  const [supabaseResponseText, setSupabaseResponseText] = useState("");
   const [supabaseResponseState, setSupabaseResponseState] = useState("");
   const [supabaseExpertResponseState, setSupabaseExpertResponseState] = useState("");
   const [supabasePromptButtonState, setSupabasePromptButtonState] = useState(<input className="user-prompt-form-button" type="submit" value="Sparraa" />);
@@ -56,20 +56,7 @@ const App = () => {
     setContactFormMessageState(e.target.value);
   }
 
-  // Simulate streaming in the frontend
-
-  const streamNextChar = (data, i) => {
-    if (i < data.length) {
-      setSupabaseResponseText((prev) => prev + data[i]);
-      setTimeout(() => streamNextChar(data, i + 1), 15);
-    } else {
-      setResponseFinishedState(true);
-    }
-  }
-
   // Automatically scroll AI response
-  // Stop automatic scrolling if user interacts with response text
-  // useEffect updates supabaseResponseState with incoming text
   // Scroll automatically unless user interacts with response (Better to stop scrolling entirely if user interacts?)
 
   const [userMouseDown, setUserMouseDown] = useState(false);
@@ -84,20 +71,7 @@ const App = () => {
   }
 
   useEffect(() => {
-    setSupabaseResponseState(
-    <button
-      type="button"
-      className="ai-response"
-      onScroll={handleMouseDown}
-      onScrollEnd={handleMouseUp}
-      onMouseDown={handleMouseDown}
-      onMouseUp={handleMouseUp}
-      ref={supabaseResponseRef}>
-
-        {supabaseResponseText}
-
-    </button>);
-
+    
     if (!responseFinishedState) {
 
      if (!userMouseDown) {
@@ -127,26 +101,41 @@ const App = () => {
 
     try {
 
-      const { data, error } = await supabase.functions.invoke('hankeai', {
+      const response = await fetch(process.env.SUPABASE_URL + "/functions/v1/hankeai", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + process.env.SUPABASE_ANON_KEY },
         body: JSON.stringify({ query: userPromptState }),
       });
 
-      if (error) {
-        throw new Error('AI response error');
+      if (!response || response === undefined || response === null) {
+        throw new Error('Error getting response');
       }
 
-      //Simulate streaming
-
       setResponseFinishedState(false);
-      setSupabaseResponseText("");
       
-      const i = 0;
-      streamNextChar(data.content, i);
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulatedText = "";
 
-      //Autofill contact form based on AI response
-      setContactFormSubjectState(data.subject);
-      setContactFormRecipientState(data.recipient);
-      setContactFormMessageState(data.message);
+      while (true) {
+
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        accumulatedText += chunk;
+        setSupabaseResponseText(accumulatedText);
+        setSupabaseResponseState(
+          <button
+            type="button"
+            className="ai-response" onScroll={handleMouseDown} onScrollEnd={handleMouseUp} onMouseDown={handleMouseDown} onMouseUp={handleMouseUp}
+            ref={supabaseResponseRef}>
+              {accumulatedText}
+          </button>);
+
+      }
+
+      setResponseFinishedState(true);
 
     } catch (error) {
       setSupabaseResponseState(
@@ -211,6 +200,34 @@ const App = () => {
       if (error) {
         throw new Error('Error sending email');
       }
+
+  }
+
+  const handlePrefill = async () => {
+
+    try {
+
+      if (supabaseResponseText === "") {
+        alert("Sparraa ensin");
+        throw new Error;
+      }
+      
+      const { data, error } = await supabase.functions.invoke('prefill-form', {
+        body: JSON.stringify(supabaseResponseText)
+      });
+
+      if (error) {
+        throw new Error('Error prefilling contact form');
+      }
+
+      //Autofill contact form based on AI response
+      setContactFormSubjectState(data.subject);
+      setContactFormRecipientState(data.recipient);
+      setContactFormMessageState(data.message);
+
+    } catch (error) {
+      throw new Error(error.message);
+    }
 
   }
 
@@ -357,7 +374,7 @@ const App = () => {
                       className="contact-form-textarea"
                       required
                     />
-                    <button type="button" className="contact-form-button">Täytä</button>
+                    <button type="button" onClick={handlePrefill} className="contact-form-button">Täytä</button>
                     <button type="button" onClick={handleContactForm} className="contact-form-button">Lähetä</button>
                     </div>
                   </form>
