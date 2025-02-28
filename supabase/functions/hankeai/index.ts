@@ -131,7 +131,7 @@ Deno.serve(async (req) => {
         }
       ],
       response_format: { type: "json_object" },
-      temperature: 0.5
+      temperature: 0.8
     });
 
   const reply = aiResponse.choices[0].message.content;

@@ -17,12 +17,50 @@ const App = () => {
   const [modalOpenState, setModalOpenState] = useState(false);
   const [userPromptState, setUserPromptState] = useState('');
 
+  //Accordion states
+
+  const [responseVisibilityState, setResponseVisibilityState] = useState(false);
+  const [expertResponseVisibilityState, setExpertResponseVisibilityState] = useState(false);
+  const [contactFormAccordionState, setContactFormAccordionState] = useState(false);
+  const supabaseResponseRef = useRef(null);
+
+  //User inputs
+
+  const [contactFormNameState, setContactFormNameState] = useState("");
+  const [contactFormSenderState, setContactFormSenderState] = useState("");
+  const [contactFormSubjectState, setContactFormSubjectState] = useState("");
+  const [contactFormRecipientState, setContactFormRecipientState] = useState("miikka@testi.fi");
+  const [contactFormMessageState, setContactFormMessageState] = useState("");
+
+  const handleUserInput = (e) => {
+    setUserPromptState(e.target.value)
+  }
+
+  const handleContactFormNameInput = (e) => {
+    setContactFormNameState(e.target.value);
+  }
+
+  const handleContactFormSenderInput = (e) => {
+    setContactFormSenderState(e.target.value);
+  }
+
+  const handleContactFormSubjectInput = (e) => {
+    setContactFormSubjectState(e.target.value);
+  }
+
+  const handleContactFormRecipientInput = (e) => {
+    setContactFormRecipientState(e.target.value);
+  }
+
+  const handleContactFormMessageInput = (e) => {
+    setContactFormMessageState(e.target.value);
+  }
+
   // Simulate streaming in the frontend
 
-
   const streamNextChar = (data, i) => {
-    if (i < data.content.length) {
-      setSupabaseResponseText((prev) => prev + data.content[i]);
+    if (i < data.length) {
+      setSupabaseResponseText((prev) => prev + data[i]);
       setTimeout(() => streamNextChar(data, i + 1), 15);
     } else {
       setResponseFinishedState(true);
@@ -31,6 +69,8 @@ const App = () => {
 
   // Automatically scroll AI response
   // Stop automatic scrolling if user interacts with response text
+  // useEffect updates supabaseResponseState with incoming text
+  // Scroll automatically unless user interacts with response (Better to stop scrolling entirely if user interacts?)
 
   const [userMouseDown, setUserMouseDown] = useState(false);
   const [responseFinishedState, setResponseFinishedState] = useState(true);
@@ -43,12 +83,10 @@ const App = () => {
     setUserMouseDown(false);
   }
 
-  //useEffect updates supabaseResponseState with incoming text
-  //Scroll automatically unless user interacts with response (Better to stop scrolling entirely if user interacts?)
-
   useEffect(() => {
     setSupabaseResponseState(
-    <button 
+    <button
+      type="button"
       className="ai-response"
       onScroll={handleMouseDown}
       onScrollEnd={handleMouseUp}
@@ -71,42 +109,6 @@ const App = () => {
   }
 
   }, [supabaseResponseText, userMouseDown, responseFinishedState]);
-
-
-  //Accordions
-
-  const [responseVisibilityState, setResponseVisibilityState] = useState(false);
-  const [expertResponseVisibilityState, setExpertResponseVisibilityState] = useState(false);
-  const [contactFormAccordionState, setContactFormAccordionState] = useState(false);
-  const supabaseResponseRef = useRef(null);
-
-  //Contact form inputs
-
-  const [contactFormNameState, setContactFormNameState] = useState("");
-  const [contactFormSenderState, setContactFormSenderState] = useState("");
-  const [contactFormSubjectState, setContactFormSubjectState] = useState("");
-  const [contactFormRecipientState, setContactFormRecipientState] = useState("miikka@testi.fi");
-  const [contactFormMessageState, setContactFormMessageState] = useState("");
-
-  const handleContactFormNameInput = (e) => {
-    setContactFormNameState(e.target.value);
-  }
-
-  const handleContactFormSenderInput = (e) => {
-    setContactFormSenderState(e.target.value);
-  }
-
-  const handleContactFormSubjectInput = (e) => {
-    setContactFormSubjectState(e.target.value);
-  }
-
-  const handleContactFormRecipientInput = (e) => {
-    setContactFormRecipientState(e.target.value);
-  }
-
-  const handleContactFormMessageInput = (e) => {
-    setContactFormMessageState(e.target.value);
-  }
 
   //Response to entrepreneur using hankeai Edge function
 
@@ -133,18 +135,18 @@ const App = () => {
         throw new Error('AI response error');
       }
 
-      //Autofill contact form based on AI response
-      setContactFormSubjectState(data.subject);
-      setContactFormRecipientState(data.recipient);
-      setContactFormMessageState(data.message);
-
       //Simulate streaming
 
       setResponseFinishedState(false);
       setSupabaseResponseText("");
       
       const i = 0;
-      streamNextChar(data, i);
+      streamNextChar(data.content, i);
+
+      //Autofill contact form based on AI response
+      setContactFormSubjectState(data.subject);
+      setContactFormRecipientState(data.recipient);
+      setContactFormMessageState(data.message);
 
     } catch (error) {
       setSupabaseResponseState(
@@ -185,19 +187,15 @@ const App = () => {
 
   //Contact form function
 
-  const handleContactForm = async (formData, formElement) => {
-
-    //TODO: implement verified sender address and real recipients
+  const handleContactForm = async () => {
 
     setModalOpenState(!modalOpenState);
 
-    const subject = formData.get('contact-form-subject');
-    const sender = formData.get('contact-form-sender');
-    const recipient = formData.get('contact-form-recipient');
-    const message = formData.get('contact-form-message');
+    const subject = contactFormSubjectState;
+    const sender = contactFormSenderState;
+    const recipient = contactFormRecipientState;
+    const message = contactFormMessageState;
     const specialistMessage = supabaseExpertResponseState.props.children;
-
-    formElement.reset();
 
       const { error } = await supabase.functions.invoke('sendgrid', {
         body: {
@@ -238,12 +236,6 @@ const App = () => {
 
   }
 
-  //Track user input
-
-  const handleUserInput = (e) => {
-    setUserPromptState(e.target.value)
-  }
-
   //Accordion close/open functions
 
   const handleResponseAccordion = (event) => {
@@ -281,10 +273,10 @@ const App = () => {
             <p className="user-continue-prompt-message">Jatka sparraamista samalla idealla?</p>
           </div>
           <div className="user-continue-prompt-buttons">
-            <button onClick={handleContinue} className="prompt-form-button">
+            <button type="button" onClick={handleContinue} className="prompt-form-button">
               Jatka samalla
             </button>
-            <button onClick={handleNewUserInput} className="prompt-form-button-reverse">
+            <button type="button" onClick={handleNewUserInput} className="prompt-form-button-reverse">
               Uusi idea
             </button>
           </div>
@@ -316,14 +308,7 @@ const App = () => {
 
           {contactFormVisibilityState && (
             <Accordion title="Yhteydenottolomake" isOpen={contactFormAccordionState} toggle={(e) => handleContactFormAccordion(e)}>
-                  <form
-                    className="contact-form"
-                    onSubmit={async (e) => {
-                      e.preventDefault();
-                      const formData = new FormData(e.target);
-                      await handleContactForm(formData, e.target);
-                    }}
-                  >
+                  <form className="contact-form">
                     <div className="contact-form-inputs">
                       <input
                         value={contactFormNameState}
@@ -372,7 +357,8 @@ const App = () => {
                       className="contact-form-textarea"
                       required
                     />
-                    <input className="contact-form-button" type="submit" value="Lähetä" />
+                    <button type="button" className="contact-form-button">Täytä</button>
+                    <button type="button" onClick={handleContactForm} className="contact-form-button">Lähetä</button>
                     </div>
                   </form>
             </Accordion>
