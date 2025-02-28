@@ -1,5 +1,5 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { supabase, openAI } from "../supabase.ts";
+import { openAI } from "../supabase.ts";
 import { corsHeaders } from "../corsHeaders.ts";
 
 Deno.serve(async (req) => {
