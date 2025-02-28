@@ -185,11 +185,14 @@ const App = () => {
 
   //Contact form function
 
-  const handleContactForm = async () => {
+  const handleContactForm = async (event) => {
+
+    event.preventDefault();
 
     if (supabaseExpertResponseState == "" || supabaseResponseText == "") {
       
       alert("Sparraa hankeideasi ensin");
+      return;
 
     } else {
 
@@ -267,7 +270,7 @@ const App = () => {
 
   const handleNewUserInput = () => {
     setUserPromptState("");
-    setSupabaseResponseState("");
+    setSupabaseResponseText("");
     setSupabaseExpertResponseState("");
 
     setContactFormSubjectState("");
