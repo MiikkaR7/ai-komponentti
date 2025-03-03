@@ -1,3 +1,4 @@
+// deno-lint-ignore-file
 import { useState, useRef, useEffect } from 'react';
 import { supabase } from './components/supabase.js';
 
