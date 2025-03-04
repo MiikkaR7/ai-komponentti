@@ -199,12 +199,14 @@ const App = () => {
   
       }
 
+      const loadingToast = toast.loading('Lähetetään...');
+
       const subject = contactFormSubjectState;
       const sender = contactFormSenderState;
       const recipient = contactFormRecipientState;
       const message = contactFormMessageState;
       const specialistMessage = supabaseExpertResponseState.props.children;
-
+      
       const { error } = await supabase.functions.invoke('sendgrid', {
         body: {
           subject: subject,
@@ -217,9 +219,11 @@ const App = () => {
       });
 
       if (error) {
+        toast.dismiss(loadingToast);
         throw new Error('Virhe sähköpostin lähettämisessä');
       }
 
+      toast.dismiss(loadingToast);
       setModalOpenState(!modalOpenState);
       
     } catch (error) {
