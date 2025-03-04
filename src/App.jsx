@@ -75,15 +75,11 @@ const App = () => {
 
   useEffect(() => {
     
-    if (!responseFinishedState) {
+    if (!responseFinishedState && !userMouseDown) {
 
-     if (!userMouseDown) {
-
-      supabaseResponseRef.current?.scrollTop = supabaseResponseRef.current?.scrollHeight;
+    supabaseResponseRef.current?.scrollTop = supabaseResponseRef.current?.scrollHeight;
 
     }
-
-  }
 
   }, [supabaseResponseText, userMouseDown, responseFinishedState]);
 
