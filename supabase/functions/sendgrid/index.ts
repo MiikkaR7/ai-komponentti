@@ -13,7 +13,8 @@ Deno.serve(async (req) => {
 
     await Ratelimit(100, 86400000, 4);
 
-    const message = await req.json();
+    const email = await req.json();
+    const message = email.message;
 
     //Use AI to detect misuse/spam/junk messages
 
@@ -23,8 +24,10 @@ Deno.serve(async (req) => {
         {
           role: "system",
           content: `Olet roskapostia estävä tarkastaja. Analysoi, onko viesti, jonka käyttäjä haluaa lähettää roskapostia.
-                    Jos viesti sisältää vain yhden virkkeen, irrallisia sanoja/kirjaimia tai se on alle 150 merkkiä, se on roskapostia.
-                    Jos viesti ei sisällä konkreettisia seikkoja, toiminta-ehdotuksia tai rahoitustiedustelua, vaan pelkän aihe-ehdotuksen nimen, se on roskapostia.
+                    Viesti on roskapostia, jos se sisältää:
+                    - alle 150 merkkiä
+                    - irrallisia sanoja tai kirjaimia
+                    - ei sisällä konkreettisia seikkoja, toiminta-ehdotuksia tai rahoitustiedustelua
                     Palauta käyttäjän viestistä arvio asteikolla 0-100, jossa 0 on asiallinen viesti ja 100 roskapostia, vastaa vain numerolla.`
         },
         {
