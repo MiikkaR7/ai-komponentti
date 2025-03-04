@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { openAI } from "../supabase.ts";
 import { corsHeaders } from "../corsHeaders.ts";
+import { Ratelimit } from "../rateLimit.ts";
 
 Deno.serve(async (req) => {
 
@@ -15,6 +16,8 @@ Deno.serve(async (req) => {
   const query = await req.json();
 
   try {
+
+    await Ratelimit(100, 86400000, 3);
   
     // openAI request
 

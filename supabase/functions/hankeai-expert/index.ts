@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { supabase, openAI } from "../supabase.ts";
 import { corsHeaders } from "../corsHeaders.ts";
+import { Ratelimit } from "../rateLimit.ts";
 
 Deno.serve(async (req) => {
 
@@ -13,6 +14,8 @@ Deno.serve(async (req) => {
   const { query } = await req.json();
 
   try {
+
+    await Ratelimit(100, 86400000, 2);
 
     // Get context, funding sources and contacts from db
     // Create JSON object with openAI response(content), AMK-expert(recipient), example subject(subject) and summarized email(message)
