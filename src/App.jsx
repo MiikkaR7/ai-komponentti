@@ -101,7 +101,7 @@ const App = () => {
       });
 
       if (!response) {
-        throw new Error('Error getting response');
+        throw new Error('Something went wrong');
       }
 
       setResponseFinishedState(false);
@@ -148,7 +148,7 @@ const App = () => {
         body: JSON.stringify({ query: userPromptState }),
       });
       if (error) {
-        throw new Error('Expert response error');
+        throw new Error('Something went wrong');
       }
       setSupabaseExpertResponseState(
         <div className="ai-response">{data.reply}</div>
@@ -295,7 +295,7 @@ const App = () => {
   //Accordion close/open functions
 
   const handleResponseAccordion = (event) => {
-    if (event.target.className === "ai-response") {
+    if (event.target.className === "ai-response" || event.target.className === "ai-response-error") {
       event.stopPropagation();
       return;
     }
@@ -303,7 +303,7 @@ const App = () => {
   }
 
   const handleExpertAccordion = (event) => {
-    if (event.target.className === "ai-response") {
+    if (event.target.className === "ai-response" || event.target.className === "ai-response-error") {
       event.stopPropagation();
       return;
     }
