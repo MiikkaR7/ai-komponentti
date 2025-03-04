@@ -1,6 +1,7 @@
 // deno-lint-ignore-file
 import { useState, useRef, useEffect } from 'react';
 import { supabase } from './components/supabase.js';
+import toast, { Toaster } from 'react-hot-toast';
 
 import Accordion from './components/Accordion.jsx';
 
@@ -192,20 +193,21 @@ const App = () => {
 
     event.preventDefault();
 
-    if (supabaseExpertResponseState == "" || supabaseResponseText == "") {
+    try {
+
+      // Only allow contact form usage if sparraus has happened
+
+      if (supabaseExpertResponseState == "" || supabaseResponseText == "") {
       
-      alert("Sparraa hankeideasi ensin");
-      return;
+        throw new Error('Sparraa hankeideasi ensin');
+  
+      }
 
-    } else {
-
-    setModalOpenState(!modalOpenState);
-
-    const subject = contactFormSubjectState;
-    const sender = contactFormSenderState;
-    const recipient = contactFormRecipientState;
-    const message = contactFormMessageState;
-    const specialistMessage = supabaseExpertResponseState.props.children;
+      const subject = contactFormSubjectState;
+      const sender = contactFormSenderState;
+      const recipient = contactFormRecipientState;
+      const message = contactFormMessageState;
+      const specialistMessage = supabaseExpertResponseState.props.children;
 
       const { error } = await supabase.functions.invoke('sendgrid', {
         body: {
@@ -219,9 +221,13 @@ const App = () => {
       });
 
       if (error) {
-        throw new Error('Error sending email');
+        throw new Error('Virhe sähköpostin lähettämisessä');
       }
 
+      setModalOpenState(!modalOpenState);
+      
+    } catch (error) {
+      toast.error(error.message);
     }
 
   }
@@ -236,9 +242,9 @@ const App = () => {
 
       if (supabaseExpertResponseState == "" || supabaseResponseText == "") {
       
-        alert("Sparraa hankeideasi ensin");
+        throw new Error('Sparraa hankeideasi ensin');
   
-      } else {
+      }
 
       setContactFormState(false);
       
@@ -247,7 +253,8 @@ const App = () => {
       });
 
       if (error) {
-        throw new Error('Error prefilling contact form');
+        setContactFormState(true);
+        throw new Error('Virhe lomakkeen täyttämisessä, yritä myöhemmin uudelleen');
       }
 
       // Autofill contact form based on AI response
@@ -257,10 +264,8 @@ const App = () => {
 
       setContactFormState(true);
 
-      }
-
     } catch (error) {
-      throw new Error(error.message);
+      toast.error(error.message);
     }
 
   }
@@ -317,6 +322,7 @@ const App = () => {
 
   return (
     <>
+    <Toaster toastOptions={{className: "toaster"}}/>
       {modalOpenState ? (
         <div className="user-continue-prompt">
           <div>
