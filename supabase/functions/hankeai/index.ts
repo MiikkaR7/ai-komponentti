@@ -56,7 +56,7 @@ Deno.serve(async (req) => {
                     2. Muotoile ehdotukset ja rahoitusehdotukset ilman luettelomerkkejä.
                     3. Anna yrittäjälle käytännön ehdotuksia vastaanotetun idean toteuttamiseen, älä ikinä anna ehdotusta, jonka yrittäjä on jo maininnut viestissään.
                     4. Ehdota myös vähintään kolmea rahoituslähdettä hankeidealle käyttäen rahoituslähdetaulua, anna rahoitusehdotukset käytännön ehdotusten jälkeen.
-                    5. Valitse yhteystiedoista hankeideaan parhaiten soveltuva edustaja, ja anna hänen yhteystietonsa yrittäjälle, anna yhteystiedot viimeisenä.`                    
+                    5. Valitse yhteystiedoista hankeideaan avainsanat-sarakkeen perusteella soveltuva edustaja, ja anna hänen etunimi ja sähköpostiosoite yrittäjälle.`                    
         },
         {
           role: 'user', 

@@ -40,7 +40,7 @@ Deno.serve(async (req) => {
       messages: [
         {
           role: 'system', 
-          content: `Rajoita vastauksesi noin 15 virkkeeseen. Olet avustaja, jonka tehtävä on auttaa Lapin AMK:n hankevalmistelijoita, vastaanottamalla yrittäjän hankeidea ja laatimalla siitä hankevalmistelijalle viesti.
+          content: `Rajoita vastauksesi noin 15 virkkeeseen. Olet avustaja, joka vastaanottaa hankeidean ja käsittelee sen hankevalmistelijalle.
                     Käytä kontekstina ${contextString}. Noudata alla olevia ohjeita:
                     1. Muotoile ehdotukset ja rahoitusehdotukset ilman luettelomerkkejä.
                     2. Tee johtopäätös siitä, soveltuuko idea paremmin opiskelijayhteistyöksi vai hankkeeksi käyttämällä kontekstia.
