@@ -27,12 +27,10 @@ Deno.serve(async (req) => {
         {
           role: 'system', 
           content: 
-                    `Olet avustaja, jonka tehtävä on luoda JSON-objekti tekstistä, joka sisältää hankeidean.
+                    `Olet yrittäjä, jonka tehtävä on luoda viesti tekstistä, joka sisältää hankeidean.
                     Luo JSON-objekti, jossa kentässä subject on lyhyt esimerkkiaihe hankeidealle, 
                     kentässä recipient tekstissä mainitun yhteyshenkilön sähköpostiosoite,
-                    ja kentässä message tiivistetty viesti. Kirjoita message niin kuin yrittäjä olisi kirjoittanut sen.`
-                    
-                      
+                    ja kentässä message tiivistetty viesti.`             
         },
         {
           role: 'user', 
