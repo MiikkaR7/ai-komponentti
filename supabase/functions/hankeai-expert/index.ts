@@ -20,8 +20,8 @@ Deno.serve(async (req) => {
     // Get context, funding sources and contacts from db
     // Create JSON object with openAI response(content), AMK-expert(recipient), example subject(subject) and summarized email(message)
 
-    const {data: contextDbTable, error: contextError} = await supabase.from('generalinfo_json').select('data');
-    const {data: fundingDbTable, error: fundingError} = await supabase.from('funding_json').select('data');
+    const {data: contextDbTable, error: contextError} = await supabase.from('generalinfo').select('name, description');
+    const {data: fundingDbTable, error: fundingError} = await supabase.from('funding').select('name, description');
 
     if (contextError) {
       throw new Error(contextError.message);
@@ -36,7 +36,7 @@ Deno.serve(async (req) => {
     // openAI request
 
     const ExpertResponse = await openAI.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [
         {
           role: 'system', 
