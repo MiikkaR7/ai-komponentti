@@ -391,13 +391,14 @@ const App = () => {
                         name="contact-form-recipient"
                         className="contact-form-select"
                       >
-                        <option value="miikka@testi.fi">miikka@testi.fi</option>
-                        <option value="pertti.rauhala@lapinamk.fi">pertti.rauhala@lapinamk.fi</option>
-                        <option value="salla.pyhajarvi@lapinamk.fi">salla.pyhajarvi@lapinamk.fi</option>
-                        <option value="saara.koho@lapinamk.fi">saara.koho@lapinamk.fi</option>
-                        <option value="mirva.tapaninen@lapinamk.fi">mirva.tapaninen@lapinamk.fi</option>
-                        <option value="jyrki.huhtaniska@lapinamk.fi">jyrki.huhtaniska@lapinamk.fi</option>
                         <option value="anne-mari.vaisanen@lapinamk.fi">anne-mari.vaisanen@lapinamk.fi</option>
+                        <option value="jyrki.huhtaniska@lapinamk.fi">jyrki.huhtaniska@lapinamk.fi</option>
+                        <option value="marjo.jussila@lapinamk.fi">marjo.jussila@lapinamk.fi</option>
+                        <option value="miikka@testi.fi">miikka@testi.fi</option>
+                        <option value="mirva.tapaninen@lapinamk.fi">mirva.tapaninen@lapinamk.fi</option>
+                        <option value="pertti.rauhala@lapinamk.fi">pertti.rauhala@lapinamk.fi</option>
+                        <option value="saara.koho@lapinamk.fi">saara.koho@lapinamk.fi</option>
+                        <option value="salla.pyhajarvi@lapinamk.fi">salla.pyhajarvi@lapinamk.fi</option>
                       </select>
                       <input
                         value={contactFormSubjectState}
