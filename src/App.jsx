@@ -112,7 +112,7 @@ const App = () => {
         accumulatedText += chunk;
         setSupabaseResponseText(accumulatedText);
         setSupabaseResponseState(
-          <button
+          <div
             type="button"
             className="ai-response"
             onScroll={handleMouseDown}
@@ -121,8 +121,8 @@ const App = () => {
             onMouseUp={handleMouseUp}
             ref={supabaseResponseRef}
           >
-            {accumulatedText}
-          </button>
+          {accumulatedText}
+          </div>
         );
       }
 
