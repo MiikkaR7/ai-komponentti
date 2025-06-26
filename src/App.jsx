@@ -121,7 +121,7 @@ const App = () => {
             onMouseUp={handleMouseUp}
             ref={supabaseResponseRef}
           >
-            <span className="ai-response-text">{accumulatedText}</span>
+          {accumulatedText}
           </button>
         );
       }
