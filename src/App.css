@@ -112,6 +112,12 @@ body {
     user-select: text;
 }
 
+.ai-response-text {
+  display: block;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
 .ai-response-error {
     margin: 0 auto;
     text-align: center;
