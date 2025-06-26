@@ -1,6 +1,7 @@
 // deno-lint-ignore-file
 import { useState, useRef, useEffect } from 'react';
 import { supabase } from './components/supabase.js';
+import toast, { Toaster } from 'react-hot-toast';
 
 import Accordion from './components/Accordion.jsx';
 
@@ -74,15 +75,11 @@ const App = () => {
 
   useEffect(() => {
     
-    if (!responseFinishedState) {
+    if (!responseFinishedState && !userMouseDown) {
 
-     if (!userMouseDown) {
-
-      supabaseResponseRef.current?.scrollTop = supabaseResponseRef.current?.scrollHeight;
+    supabaseResponseRef.current?.scrollTop = supabaseResponseRef.current?.scrollHeight;
 
     }
-
-  }
 
   }, [supabaseResponseText, userMouseDown, responseFinishedState]);
 
@@ -100,7 +97,7 @@ const App = () => {
       });
 
       if (!response) {
-        throw new Error('Error getting response');
+        throw new Error('Something went wrong');
       }
 
       setResponseFinishedState(false);
@@ -124,7 +121,7 @@ const App = () => {
             onMouseUp={handleMouseUp}
             ref={supabaseResponseRef}
           >
-            {accumulatedText}
+            <span className="ai-response-text">{accumulatedText}</span>
           </button>
         );
       }
@@ -147,7 +144,7 @@ const App = () => {
         body: JSON.stringify({ query: userPromptState }),
       });
       if (error) {
-        throw new Error('Expert response error');
+        throw new Error('Something went wrong');
       }
       setSupabaseExpertResponseState(
         <div className="ai-response">{data.reply}</div>
@@ -192,21 +189,24 @@ const App = () => {
 
     event.preventDefault();
 
-    if (supabaseExpertResponseState == "" || supabaseResponseText == "") {
+    try {
+
+      // Only allow contact form usage if sparraus has happened
+
+      if (supabaseExpertResponseState == "" || supabaseResponseText == "") {
       
-      alert("Sparraa hankeideasi ensin");
-      return;
+        throw new Error('Sparraa hankeideasi ensin');
+  
+      }
 
-    } else {
+      const loadingToast = toast.loading('Lähetetään...');
 
-    setModalOpenState(!modalOpenState);
-
-    const subject = contactFormSubjectState;
-    const sender = contactFormSenderState;
-    const recipient = contactFormRecipientState;
-    const message = contactFormMessageState;
-    const specialistMessage = supabaseExpertResponseState.props.children;
-
+      const subject = contactFormSubjectState;
+      const sender = contactFormSenderState;
+      const recipient = contactFormRecipientState;
+      const message = contactFormMessageState;
+      const specialistMessage = supabaseExpertResponseState.props.children;
+      
       const { error } = await supabase.functions.invoke('sendgrid', {
         body: {
           subject: subject,
@@ -219,9 +219,15 @@ const App = () => {
       });
 
       if (error) {
-        throw new Error('Error sending email');
+        toast.dismiss(loadingToast);
+        throw new Error('Virhe sähköpostin lähettämisessä');
       }
 
+      toast.dismiss(loadingToast);
+      setModalOpenState(!modalOpenState);
+      
+    } catch (error) {
+      toast.error(error.message);
     }
 
   }
@@ -236,9 +242,9 @@ const App = () => {
 
       if (supabaseExpertResponseState == "" || supabaseResponseText == "") {
       
-        alert("Sparraa hankeideasi ensin");
+        throw new Error('Sparraa hankeideasi ensin');
   
-      } else {
+      }
 
       setContactFormState(false);
       
@@ -247,7 +253,8 @@ const App = () => {
       });
 
       if (error) {
-        throw new Error('Error prefilling contact form');
+        setContactFormState(true);
+        throw new Error('Virhe lomakkeen täyttämisessä, yritä myöhemmin uudelleen');
       }
 
       // Autofill contact form based on AI response
@@ -257,10 +264,8 @@ const App = () => {
 
       setContactFormState(true);
 
-      }
-
     } catch (error) {
-      throw new Error(error.message);
+      toast.error(error.message);
     }
 
   }
@@ -290,7 +295,7 @@ const App = () => {
   //Accordion close/open functions
 
   const handleResponseAccordion = (event) => {
-    if (event.target.className === "ai-response") {
+    if (event.target.className === "ai-response" || event.target.className === "ai-response-error") {
       event.stopPropagation();
       return;
     }
@@ -298,7 +303,7 @@ const App = () => {
   }
 
   const handleExpertAccordion = (event) => {
-    if (event.target.className === "ai-response") {
+    if (event.target.className === "ai-response" || event.target.className === "ai-response-error") {
       event.stopPropagation();
       return;
     }
@@ -317,6 +322,7 @@ const App = () => {
 
   return (
     <>
+    <Toaster toastOptions={{className: "toaster"}}/>
       {modalOpenState ? (
         <div className="user-continue-prompt">
           <div>
@@ -385,13 +391,14 @@ const App = () => {
                         name="contact-form-recipient"
                         className="contact-form-select"
                       >
-                        <option value="miikka@testi.fi">miikka@testi.fi</option>
-                        <option value="pertti.rauhala@lapinamk.fi">pertti.rauhala@lapinamk.fi</option>
-                        <option value="salla.pyhajarvi@lapinamk.fi">salla.pyhajarvi@lapinamk.fi</option>
-                        <option value="saara.koho@lapinamk.fi">saara.koho@lapinamk.fi</option>
-                        <option value="mirva.tapaninen@lapinamk.fi">mirva.tapaninen@lapinamk.fi</option>
-                        <option value="jyrki.huhtaniska@lapinamk.fi">jyrki.huhtaniska@lapinamk.fi</option>
                         <option value="anne-mari.vaisanen@lapinamk.fi">anne-mari.vaisanen@lapinamk.fi</option>
+                        <option value="jyrki.huhtaniska@lapinamk.fi">jyrki.huhtaniska@lapinamk.fi</option>
+                        <option value="marjo.jussila@lapinamk.fi">marjo.jussila@lapinamk.fi</option>
+                        <option value="miikka@testi.fi">miikka@testi.fi</option>
+                        <option value="mirva.tapaninen@lapinamk.fi">mirva.tapaninen@lapinamk.fi</option>
+                        <option value="pertti.rauhala@lapinamk.fi">pertti.rauhala@lapinamk.fi</option>
+                        <option value="saara.koho@lapinamk.fi">saara.koho@lapinamk.fi</option>
+                        <option value="salla.pyhajarvi@lapinamk.fi">salla.pyhajarvi@lapinamk.fi</option>
                       </select>
                       <input
                         value={contactFormSubjectState}

@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { supabase, openAI } from "../supabase.ts";
 import { corsHeaders } from "../corsHeaders.ts";
+import { Ratelimit } from "../rateLimit.ts";
 
 Deno.serve(async (req) => {
 
@@ -16,76 +17,13 @@ Deno.serve(async (req) => {
 
   try {
 
-    // Rate limit using database table ratelimit_hankeai
-    // Get table data
-
-    const { data: fetchData, error: fetchError } = await supabase.from('ratelimit_hankeai').select('reset_at, requests, resets');
-
-    if (fetchError) {
-      throw new Error(fetchError.message);
-    }
-    
-    // Set rate limit and reset threshold
-    const rateLimit = 100;
-    const resetTreshold = 86400000;
-
-    // Get current amount of requests, resets and last reset time from table ratelimit_hankeai
-    const requests = fetchData![0].requests;
-    const resets = fetchData![0].resets;
-    const resetAt = fetchData![0].reset_at;
-    // Convert reset time timestamptz to Date and get current time
-    const resetAtDate = new Date(resetAt);
-    const currentTime = Date.now();
-
-    // Calculate time difference between last reset than now, reset the time if 24 hours have passed
-    const timeDifference = currentTime - resetAtDate.getTime();
-
-    // Rate limit logic, first check if more than 24 hours have passed since last reset, then enforce rate limit, after that allow request
-    if (timeDifference > resetTreshold) {
-
-      console.log("Rate limit expired, resetting")
-      const { error: timeError } = await supabase
-      .from('ratelimit_hankeai')
-      .update({reset_at: new Date().toISOString().split('.')[0] + "+00:00"})
-      .eq('id', 1)
-
-      const { error: requestsError } = await supabase
-      .from('ratelimit_hankeai')
-      .update({requests: 1})
-      .eq('id', 1)
-
-      const { error: resetError } = await supabase
-      .from('ratelimit_hankeai')
-      .update({resets: resets + 1})
-      .eq('id', 1)
-
-      if (timeError || requestsError || resetError) {
-        throw new Error("Error resetting rate limit");
-      }
-
-    } else if (requests >= rateLimit) {
-
-      // Rate limit is 100 requests in 24 hours
-      throw new Error("Rate limit exceeded");
-
-    } else {
-
-      const { error } = await supabase
-      .from('ratelimit_hankeai')
-      .update({ requests: requests + 1})
-      .eq('id', 1)
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-    }
+    await Ratelimit(100, 86400000, 1);
 
     // Get context, funding sources and contacts from db
     // Create JSON object with openAI response(content), AMK-expert(recipient), example subject(subject) and summarized email(message)
 
-    const {data: contextDbTable, error: contextError} = await supabase.from('generalinfo_json').select('data');
-    const {data: fundingDbTable, error: fundingError} = await supabase.from('funding_json').select('data');
+    const {data: contextDbTable, error: contextError} = await supabase.from('generalinfo').select('name, description');
+    const {data: fundingDbTable, error: fundingError} = await supabase.from('funding').select('name, description');
     const {data: contactsDbTable, error: contactsError} = await supabase.from('contacts').select('etunimi, sahkopostiosoite, avainsanat');
 
     if (contextError) {
@@ -105,7 +43,7 @@ Deno.serve(async (req) => {
     // openAI request
 
     const aiResponse = await openAI.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [
         {
           role: 'system', 
@@ -118,7 +56,7 @@ Deno.serve(async (req) => {
                     2. Muotoile ehdotukset ja rahoitusehdotukset ilman luettelomerkkejä.
                     3. Anna yrittäjälle käytännön ehdotuksia vastaanotetun idean toteuttamiseen, älä ikinä anna ehdotusta, jonka yrittäjä on jo maininnut viestissään.
                     4. Ehdota myös vähintään kolmea rahoituslähdettä hankeidealle käyttäen rahoituslähdetaulua, anna rahoitusehdotukset käytännön ehdotusten jälkeen.
-                    5. Valitse yhteystiedoista hankeideaan parhaiten soveltuva edustaja, ja anna hänen yhteystietonsa yrittäjälle, anna yhteystiedot viimeisenä.`                    
+                    5. Valitse yhteystiedoista hankeideaan avainsanat-sarakkeen perusteella soveltuva edustaja, ja anna hänen etunimi ja sähköpostiosoite yrittäjälle.`                    
         },
         {
           role: 'user', 

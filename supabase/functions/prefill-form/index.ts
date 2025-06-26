@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { openAI } from "../supabase.ts";
 import { corsHeaders } from "../corsHeaders.ts";
+import { Ratelimit } from "../rateLimit.ts";
 
 Deno.serve(async (req) => {
 
@@ -15,6 +16,8 @@ Deno.serve(async (req) => {
   const query = await req.json();
 
   try {
+
+    await Ratelimit(100, 86400000, 3);
   
     // openAI request
 
@@ -24,12 +27,10 @@ Deno.serve(async (req) => {
         {
           role: 'system', 
           content: 
-                    `Olet avustaja, jonka tehtävä on luoda JSON-objekti tekstistä, joka sisältää hankeidean.
+                    `Olet yrittäjä, jonka tehtävä on luoda viesti tekstistä, joka sisältää hankeidean.
                     Luo JSON-objekti, jossa kentässä subject on lyhyt esimerkkiaihe hankeidealle, 
                     kentässä recipient tekstissä mainitun yhteyshenkilön sähköpostiosoite,
-                    ja kentässä message tiivistetty viesti. Kirjoita message niin kuin yrittäjä olisi kirjoittanut sen.`
-                    
-                      
+                    ja kentässä message tiivistetty viesti.`             
         },
         {
           role: 'user', 

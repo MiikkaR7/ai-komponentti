@@ -1,6 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 import { supabase, openAI } from "../supabase.ts";
 import { corsHeaders } from "../corsHeaders.ts";
+import { Ratelimit } from "../rateLimit.ts";
 
 Deno.serve(async (req) => {
 
@@ -14,11 +15,13 @@ Deno.serve(async (req) => {
 
   try {
 
+    await Ratelimit(100, 86400000, 2);
+
     // Get context, funding sources and contacts from db
     // Create JSON object with openAI response(content), AMK-expert(recipient), example subject(subject) and summarized email(message)
 
-    const {data: contextDbTable, error: contextError} = await supabase.from('generalinfo_json').select('data');
-    const {data: fundingDbTable, error: fundingError} = await supabase.from('funding_json').select('data');
+    const {data: contextDbTable, error: contextError} = await supabase.from('generalinfo').select('name, description');
+    const {data: fundingDbTable, error: fundingError} = await supabase.from('funding').select('name, description');
 
     if (contextError) {
       throw new Error(contextError.message);
@@ -33,11 +36,11 @@ Deno.serve(async (req) => {
     // openAI request
 
     const ExpertResponse = await openAI.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-4o-mini",
       messages: [
         {
           role: 'system', 
-          content: `Rajoita vastauksesi noin 15 virkkeeseen. Olet avustaja, jonka tehtävä on auttaa Lapin AMK:n hankevalmistelijoita, vastaanottamalla yrittäjän hankeidea ja laatimalla siitä hankevalmistelijalle viesti.
+          content: `Rajoita vastauksesi noin 15 virkkeeseen. Olet avustaja, joka vastaanottaa hankeidean ja käsittelee sen hankevalmistelijalle.
                     Käytä kontekstina ${contextString}. Noudata alla olevia ohjeita:
                     1. Muotoile ehdotukset ja rahoitusehdotukset ilman luettelomerkkejä.
                     2. Tee johtopäätös siitä, soveltuuko idea paremmin opiskelijayhteistyöksi vai hankkeeksi käyttämällä kontekstia.

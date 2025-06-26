@@ -4,6 +4,9 @@ body {
     width: calc(100vw - 34px);
 }
 
+.toaster {
+    font-family: 'Manrope', sans-serif;
+}
 
 .ai-komponentti {
     justify-content: center;
@@ -107,6 +110,12 @@ body {
     font-weight: 100;
     color: #333;
     user-select: text;
+}
+
+.ai-response-text {
+  display: block;
+  white-space: pre-wrap;
+  word-wrap: break-word;
 }
 
 .ai-response-error {
